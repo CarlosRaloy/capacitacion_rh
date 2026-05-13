@@ -1,0 +1,291 @@
+/* =============================================================
+   Panel de usuarios — estilos para los modales Crear / Editar
+   Aplica a cualquier modal con la clase .user-modal
+   ============================================================= */
+
+.user-modal .modal-dialog {
+    max-width: 760px;
+}
+
+.user-modal .modal-content {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(15, 30, 60, .28);
+}
+
+/* ---------- Header ---------- */
+.user-modal .modal-header {
+    background: linear-gradient(135deg, #0a6ebd 0%, #009587 100%);
+    color: #fff;
+    border-bottom: none;
+    padding: 1.1rem 1.6rem;
+    position: relative;
+}
+.user-modal .modal-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.18), transparent 60%);
+    pointer-events: none;
+}
+.user-modal .modal-title {
+    font-weight: 600;
+    letter-spacing: .25px;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin: 0;
+}
+.user-modal .modal-title i {
+    background: rgba(255,255,255,.18);
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+/* Botón cerrar — BS4 usa <button class="close"><span>&times;</span></button> */
+.user-modal .modal-header .close {
+    color: #fff;
+    opacity: .85;
+    text-shadow: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    padding: 0 .5rem;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+.user-modal .modal-header .close:hover,
+.user-modal .modal-header .close:focus {
+    color: #fff;
+    opacity: 1;
+    outline: none;
+}
+
+/* ---------- Body ---------- */
+.user-modal .modal-body {
+    background: #f5f7fb;
+    padding: 1.4rem 1.5rem;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+/* Secciones agrupadas */
+.um-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem 1.15rem 1.05rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e9eef5;
+    box-shadow: 0 2px 6px rgba(15, 30, 60, .04);
+}
+.um-section:last-child { margin-bottom: 0; }
+
+.um-section-header {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: .9rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px dashed #e6ecf3;
+}
+.um-section-header i {
+    color: #0a6ebd;
+    font-size: .95rem;
+    width: 22px;
+    text-align: center;
+}
+.um-section-header h6 {
+    margin: 0;
+    font-weight: 700;
+    color: #334155;
+    text-transform: uppercase;
+    font-size: .74rem;
+    letter-spacing: .8px;
+}
+
+/* ---------- Labels ---------- */
+.user-modal .um-field { margin-bottom: 0; }
+.user-modal .um-field > label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: .35rem;
+    display: block;
+    letter-spacing: .15px;
+}
+.user-modal .um-field > label .text-danger { font-weight: 700; }
+
+/* ---------- Inputs ---------- */
+.user-modal .form-control {
+    border-radius: 9px;
+    border: 1px solid #d8dfe9;
+    padding: .55rem .8rem;
+    font-size: .92rem;
+    background: #fff;
+    color: #1e293b;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s;
+    height: auto;
+}
+.user-modal .form-control::placeholder { color: #9aa6b6; }
+.user-modal .form-control:hover { border-color: #b9c3d1; }
+.user-modal .form-control:focus {
+    border-color: #0a6ebd;
+    box-shadow: 0 0 0 3px rgba(10, 110, 189, .15);
+    outline: none;
+    background: #fff;
+}
+.user-modal textarea.form-control { min-height: 80px; }
+
+/* ---------- Select2 alineado con inputs ---------- */
+.user-modal .select2-container--default .select2-selection--single,
+.select2-container--default .select2-dropdown.user-modal-dropdown {
+    border-radius: 9px;
+    border: 1px solid #d8dfe9;
+}
+.user-modal .select2-container--default .select2-selection--single {
+    height: 40px;
+    padding: .2rem .55rem;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+}
+.user-modal .select2-container--default .select2-selection--single:hover {
+    border-color: #b9c3d1;
+}
+.user-modal .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 26px;
+    padding-left: 4px;
+    padding-right: 22px;
+    color: #1e293b;
+}
+.user-modal .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #9aa6b6;
+}
+.user-modal .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+    right: 6px;
+}
+.user-modal .select2-container--default.select2-container--focus .select2-selection--single,
+.user-modal .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #0a6ebd;
+    box-shadow: 0 0 0 3px rgba(10, 110, 189, .15);
+}
+/* clear (x) */
+.user-modal .select2-container--default .select2-selection__clear {
+    color: #94a3b8;
+    margin-right: 8px;
+    font-weight: 700;
+}
+
+/* ---------- Bloque de Jefe inmediato (toggle pill) ----------
+   Bootstrap 4: label.btn dentro de .btn-group-toggle con data-toggle="buttons".
+   Cuando el radio interno queda seleccionado, BS añade .active al label.
+-------------------------------------------------------------- */
+.boss-mode-group {
+    display: inline-flex;
+    background: #eef2f8;
+    padding: 4px;
+    border-radius: 999px;
+    margin-bottom: .8rem;
+}
+.boss-mode-group label.btn {
+    font-size: .78rem;
+    padding: .35rem 1rem !important;
+    border-radius: 999px !important;
+    border: none !important;
+    background: transparent !important;
+    color: #475569 !important;
+    font-weight: 500;
+    transition: all .18s ease;
+    box-shadow: none !important;
+    margin: 0 !important;
+    cursor: pointer;
+}
+.boss-mode-group label.btn input { display: none; }
+.boss-mode-group label.btn:hover { color: #0a6ebd !important; }
+.boss-mode-group label.btn.active,
+.boss-mode-group label.btn.active:focus {
+    background: linear-gradient(135deg, #0a6ebd 0%, #009587 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 3px 8px rgba(10, 110, 189, .25) !important;
+}
+.boss-list-wrap small,
+.boss-manual-wrap small {
+    display: block;
+    margin-top: .4rem;
+    color: #94a3b8;
+}
+
+/* ---------- Footer ---------- */
+.user-modal .modal-footer {
+    background: #fff;
+    border-top: 1px solid #eef2f7;
+    padding: .85rem 1.5rem;
+    gap: .5rem;
+}
+.user-modal .modal-footer .btn {
+    padding: .55rem 1.3rem;
+    border-radius: 9px;
+    font-weight: 500;
+    font-size: .9rem;
+    transition: transform .12s ease, box-shadow .12s ease, background .15s;
+}
+.user-modal .modal-footer .btn-primary {
+    background: linear-gradient(135deg, #0a6ebd 0%, #009587 100%);
+    border: none;
+    box-shadow: 0 6px 14px rgba(10, 110, 189, .25);
+}
+.user-modal .modal-footer .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(10, 110, 189, .35);
+}
+.user-modal .modal-footer .btn-light,
+.user-modal .modal-footer .btn-secondary {
+    background: #eef2f8;
+    border: none;
+    color: #475569;
+}
+.user-modal .modal-footer .btn-light:hover {
+    background: #e1e7f0;
+    color: #1e293b;
+}
+
+/* ---------- Botón flotante crear (estética) ---------- */
+#btn-create-user {
+    background: linear-gradient(135deg, #00a884 0%, #009587 100%);
+    border: none;
+    padding: .55rem 1.1rem;
+    border-radius: 9px;
+    box-shadow: 0 6px 14px rgba(0, 149, 135, .25);
+    font-weight: 500;
+    transition: transform .12s, box-shadow .12s;
+}
+#btn-create-user:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0, 149, 135, .35);
+    background: linear-gradient(135deg, #009587 0%, #007e72 100%);
+}
+
+/* ---------- Tabla — badges de nivel con un toque más vivo ---------- */
+.panel-user-table .badge {
+    padding: .4em .65em;
+    font-weight: 500;
+    border-radius: 6px;
+    letter-spacing: .2px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 575.98px) {
+    .user-modal .modal-body { padding: 1rem; }
+    .um-section { padding: .85rem; }
+    .boss-mode-group { width: 100%; justify-content: center; }
+}
+
+/* Select2 dropdown debe sobreponer al modal de Bootstrap (.modal usa z-index 1050) */
+.select2-container--open { z-index: 1060 !important; }

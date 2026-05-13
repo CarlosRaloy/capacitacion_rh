@@ -3,6 +3,7 @@
 
 {% block head_content %}
     <title>Usuarios</title>
+    <link rel="stylesheet" href="{% static 'css/users/pane_user.css' %}">
 {% endblock %}
 
 {% block panel_page %}
@@ -21,17 +22,21 @@
     <i class="fas fa-user-plus"></i> Crear Usuario
 </button>
 
-<h1><i class="fas fa-users me-2" style="color: #009587"></i> Panel de Usuarios</h1>
+<h1><i class="fas fa-users mr-2" style="color: #009587"></i> Panel de Usuarios</h1>
 <hr>
 
-<!-- Tabla USUARIOS CORRECTAMENTE CUADRADA -->
+<!-- Tabla USUARIOS -->
 <div class="rwd-container">
-  <table class="table table-bordered table-hover table-sm align-middle rwd-table">
+  <table class="table table-bordered table-hover table-sm align-middle rwd-table panel-user-table">
       <thead class="table-light">
           <tr>
-              <th>Nombre</th>
+              <th>Nombre del trabajador</th>
               <th>Usuario</th>
-               <th>Email</th>
+              <th>Email</th>
+              <th>N° Nómina</th>
+              <th>Puesto</th>
+              <th>Área</th>
+              <th>Jefe inmediato</th>
               <th>Nivel</th>
               <th>Último Acceso</th>
               <th class="text-center">Acciones</th>
@@ -39,19 +44,38 @@
       </thead>
       <tbody>
           {% for user in users %}
+          {% with p=user.profile %}
           <tr>
               <td>{{ user.get_full_name }}</td>
               <td>{{ user.username }}</td>
               <td>{{ user.email }}</td>
+              <td>{{ p.payroll_number|default:"—" }}</td>
+              <td>{{ p.position.name_position|default:"—" }}</td>
+              <td>{{ p.area.name_area|default:"—" }}</td>
               <td>
-                  {% if user.profile.level == 0 %}
-                      <span class="badge bg-secondary">Bloqueado</span>
-                  {% elif user.profile.level == 1 %}
-                      <span class="badge bg-info text-dark">Usuario</span>
-                  {% elif user.profile.level == 2 %}
-                      <span class="badge bg-success">Administrador</span>
+                  {% if p.boss %}
+                      {{ p.boss.get_full_name|default:p.boss.username }}
+                  {% elif p.boss_name %}
+                      {{ p.boss_name }} <span class="text-muted small">(manual)</span>
                   {% else %}
-                      <span class="badge bg-warning text-dark">Otro</span>
+                      —
+                  {% endif %}
+              </td>
+              <td>
+                  {% if p.level == 0 %}
+                      <span class="badge badge-secondary">Bloqueado</span>
+                  {% elif p.level == 1 %}
+                      <span class="badge badge-info">Usuario</span>
+                  {% elif p.level == 2 %}
+                      <span class="badge badge-success">Administrador</span>
+                  {% elif p.level == 3 %}
+                      <span class="badge badge-success">Admin (sistema)</span>
+                  {% elif p.level == 4 %}
+                      <span class="badge badge-primary">Jefe / Líder</span>
+                  {% elif p.level == 5 %}
+                      <span class="badge badge-dark">RH</span>
+                  {% else %}
+                      <span class="badge badge-warning">Otro</span>
                   {% endif %}
               </td>
               <td>
@@ -68,7 +92,12 @@
                           data-email="{{ user.email }}"
                           data-first_name="{{ user.first_name }}"
                           data-last_name="{{ user.last_name }}"
-                          data-level="{{ user.profile.level }}">
+                          data-level="{{ p.level }}"
+                          data-payroll_number="{{ p.payroll_number|default_if_none:'' }}"
+                          data-position="{{ p.position_id|default_if_none:'' }}"
+                          data-area="{{ p.area_id|default_if_none:'' }}"
+                          data-boss="{{ p.boss_id|default_if_none:'' }}"
+                          data-boss_name="{{ p.boss_name|default_if_none:'' }}">
                       <i class="fas fa-edit"></i>
                   </button>
                   <button class="btn btn-sm btn-danger btn-delete" data-id="{{ user.id }}">
@@ -76,9 +105,10 @@
                   </button>
               </td>
           </tr>
+          {% endwith %}
           {% empty %}
           <tr>
-              <td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td>
+              <td colspan="10" class="text-center text-muted">No hay usuarios registrados.</td>
           </tr>
           {% endfor %}
       </tbody>
@@ -86,47 +116,140 @@
 </div>
 
 <!-- Modal Crear Usuario -->
-<div class="modal fade" id="modal-create-user" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <form id="form-create-user" method="POST">
+<div class="modal fade user-modal" id="modal-create-user" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <form id="form-create-user" method="POST" autocomplete="off">
       {% csrf_token %}
       <input type="hidden" name="action" value="create">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title"><i class="fas fa-user-plus"></i> Crear Usuario</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-        <div class="modal-body row g-2">
-          <div class="col-md-4">
-            <label>Nombre</label>
-            <input type="text" name="first_name" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label>Apellido</label>
-            <input type="text" name="last_name" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label>Contraseña</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          <div class="col-md-4">
-            <label>Email (opcional)</label>
-            <input type="email" name="email" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label>Nivel</label>
-            <select name="level" class="form-control">
-              <option value="0">Bloqueado</option>
-              <option value="1">Normal</option>
-              <option value="2">Administrador</option>
-            </select>
-          </div>
+        <div class="modal-body">
+
+          <!-- Datos personales -->
+          <section class="um-section">
+            <div class="um-section-header">
+              <i class="fas fa-id-card"></i>
+              <h6>Datos personales</h6>
+            </div>
+            <div class="row">
+              <div class="col-md-4 um-field mb-2">
+                <label>Nombre <span class="text-danger">*</span></label>
+                <input type="text" name="first_name" class="form-control" required>
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Apellido <span class="text-danger">*</span></label>
+                <input type="text" name="last_name" class="form-control" required>
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" placeholder="usuario@correo.com">
+              </div>
+            </div>
+          </section>
+
+          <!-- Acceso -->
+          <section class="um-section">
+            <div class="um-section-header">
+              <i class="fas fa-lock"></i>
+              <h6>Acceso al sistema</h6>
+            </div>
+            <div class="row">
+              <div class="col-md-6 um-field mb-2">
+                <label>Usuario (login) <span class="text-danger">*</span></label>
+                <input type="text" name="username" class="form-control" required>
+              </div>
+              <div class="col-md-6 um-field mb-2">
+                <label>Contraseña <span class="text-danger">*</span></label>
+                <input type="password" name="password" class="form-control" required>
+              </div>
+            </div>
+          </section>
+
+          <!-- Rol y organización -->
+          <section class="um-section">
+            <div class="um-section-header">
+              <i class="fas fa-sitemap"></i>
+              <h6>Rol y organización</h6>
+            </div>
+            <div class="row">
+              <div class="col-md-4 um-field mb-2">
+                <label>Nivel</label>
+                <select name="level" class="form-control">
+                  <option value="0">Bloqueado</option>
+                  <option value="1" selected>Normal</option>
+                  <option value="2">Administrador</option>
+                  <option value="3">Admin (sistema)</option>
+                  <option value="4">Jefe / Líder</option>
+                  <option value="5">RH</option>
+                </select>
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>N° Nómina</label>
+                <input type="text" name="payroll_number" class="form-control" placeholder="Ej. 685">
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Puesto</label>
+                <select name="position" class="form-control select2-field" data-placeholder="— Sin asignar —">
+                  <option value=""></option>
+                  {% for p in positions %}
+                    <option value="{{ p.id }}">{{ p.name_position }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Área</label>
+                <select name="area" class="form-control select2-field" data-placeholder="— Sin asignar —">
+                  <option value=""></option>
+                  {% for a in areas %}
+                    <option value="{{ a.id }}">{{ a.name_area }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Jefe inmediato -->
+          <section class="um-section">
+            <div class="um-section-header">
+              <i class="fas fa-user-tie"></i>
+              <h6>Jefe inmediato</h6>
+            </div>
+            <div class="btn-group btn-group-toggle boss-mode-group" data-toggle="buttons" role="group">
+                <label class="btn active">
+                    <input type="radio" name="boss_mode" value="list" checked>
+                    <i class="fas fa-list mr-1"></i> De la lista
+                </label>
+                <label class="btn">
+                    <input type="radio" name="boss_mode" value="manual">
+                    <i class="fas fa-pen mr-1"></i> Manual
+                </label>
+            </div>
+            <div class="boss-list-wrap um-field">
+                <select name="boss" class="form-control select2-field" data-placeholder="— Selecciona un jefe (nivel 4) —">
+                  <option value=""></option>
+                  {% for b in bosses %}
+                    <option value="{{ b.id }}">{{ b.get_full_name|default:b.username }}</option>
+                  {% endfor %}
+                </select>
+                {% if not bosses %}
+                  <small><i class="fas fa-info-circle mr-1"></i>No hay usuarios con nivel 4 todavía. Usa "Manual" o crea uno con nivel "Jefe / Líder".</small>
+                {% endif %}
+            </div>
+            <div class="boss-manual-wrap um-field" style="display:none;">
+                <input type="text" name="boss_name" class="form-control" placeholder="Nombre completo del jefe">
+                <small><i class="fas fa-info-circle mr-1"></i>Se guarda como texto libre (no vinculado a un usuario).</small>
+            </div>
+          </section>
+
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Guardar</button>
         </div>
       </div>
     </form>
@@ -134,40 +257,120 @@
 </div>
 
 <!-- Modal Editar Usuario -->
-<div class="modal fade" id="modal-edit-user" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <form id="form-edit-user" method="POST">
+<div class="modal fade user-modal" id="modal-edit-user" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <form id="form-edit-user" method="POST" autocomplete="off">
       {% csrf_token %}
       <input type="hidden" name="action" value="edit">
       <input type="hidden" name="user_id">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title"><i class="fas fa-user-edit"></i> Editar Usuario</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-        <div class="modal-body row g-2">
-          <div class="col-md-4">
-            <label>Nombre</label>
-            <input type="text" name="first_name" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label>Apellido</label>
-            <input type="text" name="last_name" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label>Email</label>
-            <input type="email" name="email" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label>Nivel</label>
-            <select name="level" class="form-control">
-              <option value="0">Bloqueado</option>
-              <option value="1">Normal</option>
-              <option value="2">Administrador</option>
-            </select>
-          </div>
+        <div class="modal-body">
+
+          <!-- Datos personales -->
+          <section class="um-section">
+            <div class="um-section-header">
+              <i class="fas fa-id-card"></i>
+              <h6>Datos personales</h6>
+            </div>
+            <div class="row">
+              <div class="col-md-4 um-field mb-2">
+                <label>Nombre</label>
+                <input type="text" name="first_name" class="form-control">
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Apellido</label>
+                <input type="text" name="last_name" class="form-control">
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control">
+              </div>
+            </div>
+          </section>
+
+          <!-- Rol y organización -->
+          <section class="um-section">
+            <div class="um-section-header">
+              <i class="fas fa-sitemap"></i>
+              <h6>Rol y organización</h6>
+            </div>
+            <div class="row">
+              <div class="col-md-4 um-field mb-2">
+                <label>Nivel</label>
+                <select name="level" class="form-control">
+                  <option value="0">Bloqueado</option>
+                  <option value="1">Normal</option>
+                  <option value="2">Administrador</option>
+                  <option value="3">Admin (sistema)</option>
+                  <option value="4">Jefe / Líder</option>
+                  <option value="5">RH</option>
+                </select>
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>N° Nómina</label>
+                <input type="text" name="payroll_number" class="form-control">
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Puesto</label>
+                <select name="position" class="form-control select2-field" data-placeholder="— Sin asignar —">
+                  <option value=""></option>
+                  {% for p in positions %}
+                    <option value="{{ p.id }}">{{ p.name_position }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4 um-field mb-2">
+                <label>Área</label>
+                <select name="area" class="form-control select2-field" data-placeholder="— Sin asignar —">
+                  <option value=""></option>
+                  {% for a in areas %}
+                    <option value="{{ a.id }}">{{ a.name_area }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Jefe inmediato -->
+          <section class="um-section">
+            <div class="um-section-header">
+              <i class="fas fa-user-tie"></i>
+              <h6>Jefe inmediato</h6>
+            </div>
+            <div class="btn-group btn-group-toggle boss-mode-group" data-toggle="buttons" role="group">
+                <label class="btn active">
+                    <input type="radio" name="boss_mode" value="list" checked>
+                    <i class="fas fa-list mr-1"></i> De la lista
+                </label>
+                <label class="btn">
+                    <input type="radio" name="boss_mode" value="manual">
+                    <i class="fas fa-pen mr-1"></i> Manual
+                </label>
+            </div>
+            <div class="boss-list-wrap um-field">
+                <select name="boss" class="form-control select2-field" data-placeholder="— Selecciona un jefe (nivel 4) —">
+                  <option value=""></option>
+                  {% for b in bosses %}
+                    <option value="{{ b.id }}">{{ b.get_full_name|default:b.username }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+            <div class="boss-manual-wrap um-field" style="display:none;">
+                <input type="text" name="boss_name" class="form-control" placeholder="Nombre completo del jefe">
+                <small><i class="fas fa-info-circle mr-1"></i>Se guarda como texto libre (no vinculado a un usuario).</small>
+            </div>
+          </section>
+
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Actualizar</button>
+          <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-check mr-1"></i> Actualizar</button>
         </div>
       </div>
     </form>
@@ -178,24 +381,63 @@
 
 {% block scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+$(function () {
 
-    // Abrir modal Crear Usuario (si existe el botón)
-    const createBtn = document.getElementById("btn-create-user");
-    if (createBtn) {
-        const createModal = new bootstrap.Modal(document.getElementById("modal-create-user"));
-        createBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            createModal.show();
+    // ---------- Helpers Select2 ----------
+    function initSelect2In($modal) {
+        $modal.find('select.select2-field').each(function () {
+            const $sel = $(this);
+            if ($sel.hasClass('select2-hidden-accessible')) {
+                $sel.select2('destroy');
+            }
+            $sel.select2({
+                dropdownParent: $modal,
+                width: '100%',
+                allowClear: true,
+                placeholder: $sel.data('placeholder') || ''
+            });
         });
     }
 
-    // Enviar formulario CREAR USUARIO
-    $('#form-create-user').submit(function (e) {
+    // ---------- Toggle Lista / Manual del Jefe (BS4) ----------
+    function applyBossMode($form, mode) {
+        const manual = mode === 'manual';
+        $form.find('.boss-list-wrap').toggle(!manual);
+        $form.find('.boss-manual-wrap').toggle(manual);
+        // Sincronizar checked + clase .active del label (BS4)
+        $form.find('input[name="boss_mode"]').each(function () {
+            const match = $(this).val() === mode;
+            $(this).prop('checked', match);
+            $(this).closest('label.btn').toggleClass('active', match);
+        });
+    }
+    function bindBossToggle($form) {
+        $form.find('input[name="boss_mode"]').off('change.boss').on('change.boss', function () {
+            applyBossMode($form, $(this).val());
+        });
+    }
+
+    // ---------- Modal CREAR ----------
+    const $modalCreate = $('#modal-create-user');
+    const $formCreate  = $('#form-create-user');
+    bindBossToggle($formCreate);
+
+    $('#btn-create-user').on('click', function (e) {
+        e.preventDefault();
+        $formCreate[0].reset();
+        applyBossMode($formCreate, 'list');
+        $modalCreate.modal('show');
+    });
+
+    $modalCreate.on('shown.bs.modal', function () {
+        initSelect2In($modalCreate);
+    });
+
+    $formCreate.on('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(this);
         $.ajax({
-            url: "{% url 'users:panel' %}",
+            url: "{% url 'users:panel_user' %}",
             method: "POST",
             data: formData,
             processData: false,
@@ -213,23 +455,49 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Abrir modal Editar Usuario y precargar datos
-    $(".btn-edit").click(function () {
-        const modal = new bootstrap.Modal(document.getElementById("modal-edit-user"));
-        $("#form-edit-user input[name='user_id']").val($(this).data("id"));
-        $("#form-edit-user input[name='first_name']").val($(this).data("first_name"));
-        $("#form-edit-user input[name='last_name']").val($(this).data("last_name"));
-        $("#form-edit-user input[name='email']").val($(this).data("email"));
-        $("#form-edit-user select[name='level']").val($(this).data("level"));
-        modal.show();
+    // ---------- Modal EDITAR ----------
+    const $modalEdit = $('#modal-edit-user');
+    const $formEdit  = $('#form-edit-user');
+    bindBossToggle($formEdit);
+
+    $modalEdit.on('shown.bs.modal', function () {
+        initSelect2In($modalEdit);
+        // Refrescar los Select2 con el valor precargado
+        $modalEdit.find('select.select2-field').trigger('change.select2');
     });
 
-    // Enviar formulario EDITAR USUARIO
-    $('#form-edit-user').submit(function (e) {
+    $('.btn-edit').on('click', function () {
+        const $btn = $(this);
+
+        $formEdit.find("input[name='user_id']").val($btn.data("id"));
+        $formEdit.find("input[name='first_name']").val($btn.data("first_name"));
+        $formEdit.find("input[name='last_name']").val($btn.data("last_name"));
+        $formEdit.find("input[name='email']").val($btn.data("email"));
+        $formEdit.find("select[name='level']").val($btn.data("level"));
+        $formEdit.find("input[name='payroll_number']").val($btn.data("payroll_number"));
+        $formEdit.find("select[name='position']").val(String($btn.data("position")));
+        $formEdit.find("select[name='area']").val(String($btn.data("area")));
+
+        const bossId = String($btn.data("boss") || '');
+        const bossName = $btn.data("boss_name") || '';
+        if (!bossId && bossName) {
+            $formEdit.find("input[name='boss_name']").val(bossName);
+            $formEdit.find("select[name='boss']").val('');
+            applyBossMode($formEdit, 'manual');
+        } else {
+            $formEdit.find("select[name='boss']").val(bossId);
+            $formEdit.find("input[name='boss_name']").val('');
+            applyBossMode($formEdit, 'list');
+        }
+
+        $modalEdit.modal('show');
+    });
+
+    $formEdit.on('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(this);
         $.ajax({
-            url: "{% url 'users:panel' %}",
+            url: "{% url 'users:panel_user' %}",
             method: "POST",
             data: formData,
             processData: false,
@@ -247,8 +515,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Eliminar usuario
-    $(".btn-delete").click(function () {
+    // ---------- Eliminar ----------
+    $('.btn-delete').on('click', function () {
         const userId = $(this).data("id");
         Swal.fire({
             title: '¿Eliminar usuario?',
@@ -260,7 +528,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: "{% url 'users:panel' %}",
+                    url: "{% url 'users:panel_user' %}",
                     method: "POST",
                     data: {
                         action: "delete",
@@ -285,4 +553,3 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 {% endblock %}
-

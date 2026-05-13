@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_content %}
+    <title>Áreas</title>
+{% endblock %}
+
+{% block panel_page %}
+    Áreas <small>Catálogo de áreas / departamentos</small>
+{% endblock %}
+
+{% block panel_title %}
+    Catálogos
+{% endblock %}
+
+{% block content %}
+
+<button id="btn-create-area" class="btn btn-success mb-3">
+    <i class="fas fa-plus"></i> Nueva Área
+</button>
+
+<h1><i class="fa-solid fa-sitemap me-2" style="color: #ff8a65"></i> Áreas</h1>
+<hr>
+
+<div class="rwd-container">
+  <table class="table table-bordered table-hover table-sm align-middle rwd-table">
+      <thead class="table-light">
+          <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th class="text-center">Acciones</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for a in areas %}
+          <tr>
+              <td>{{ a.name_area }}</td>
+              <td>{{ a.description|default:"—" }}</td>
+              <td class="text-center">
+                  <button class="btn btn-sm btn-primary btn-edit-area"
+                          data-id="{{ a.id }}"
+                          data-name_area="{{ a.name_area }}"
+                          data-description="{{ a.description|default_if_none:'' }}">
+                      <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-delete-area" data-id="{{ a.id }}">
+                      <i class="fas fa-trash-alt"></i>
+                  </button>
+              </td>
+          </tr>
+          {% empty %}
+          <tr>
+              <td colspan="3" class="text-center text-muted">No hay áreas registradas.</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+<!-- Modal Crear Área -->
+<div class="modal fade" id="modal-create-area" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="form-create-area" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-plus"></i> Nueva Área</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body row">
+          <div class="col-md-12">
+            <label>Nombre</label>
+            <input type="text" name="name_area" class="form-control" required>
+          </div>
+          <div class="col-md-12">
+            <label>Descripción</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar Área -->
+<div class="modal fade" id="modal-edit-area" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="form-edit-area" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="edit">
+      <input type="hidden" name="obj_id">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-edit"></i> Editar Área</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body row">
+          <div class="col-md-12">
+            <label>Nombre</label>
+            <input type="text" name="name_area" class="form-control" required>
+          </div>
+          <div class="col-md-12">
+            <label>Descripción</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Actualizar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    $('#btn-create-area').on('click', function (e) {
+        e.preventDefault();
+        $('#form-create-area')[0].reset();
+        $('#modal-create-area').modal('show');
+    });
+
+    $('#form-create-area').submit(function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        $.ajax({
+            url: "{% url 'users:panel_areas' %}",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data.success) {
+                    Swal.fire("✅ Éxito", data.message, "success").then(() => location.reload());
+                } else {
+                    Swal.fire("❌ Error", data.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("❌ Error", "Error inesperado en el servidor", "error");
+            }
+        });
+    });
+
+    $(".btn-edit-area").click(function () {
+        $("#form-edit-area input[name='obj_id']").val($(this).data("id"));
+        $("#form-edit-area input[name='name_area']").val($(this).data("name_area"));
+        $("#form-edit-area textarea[name='description']").val($(this).data("description"));
+        $('#modal-edit-area').modal('show');
+    });
+
+    $('#form-edit-area').submit(function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        $.ajax({
+            url: "{% url 'users:panel_areas' %}",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data.success) {
+                    Swal.fire("✅ Actualizado", data.message, "success").then(() => location.reload());
+                } else {
+                    Swal.fire("❌ Error", data.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("❌ Error", "Error inesperado en el servidor", "error");
+            }
+        });
+    });
+
+    $(".btn-delete-area").click(function () {
+        const objId = $(this).data("id");
+        Swal.fire({
+            title: '¿Eliminar área?',
+            text: "Los usuarios que la tengan asignada quedarán sin área.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{% url 'users:panel_areas' %}",
+                    method: "POST",
+                    data: {
+                        action: "delete",
+                        obj_id: objId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            Swal.fire("✅ Eliminado", data.message, "success").then(() => location.reload());
+                        } else {
+                            Swal.fire("❌ Error", data.message, "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("❌ Error", "Error inesperado al eliminar", "error");
+                    }
+                });
+            }
+        });
+    });
+
+});
+</script>
+{% endblock %}

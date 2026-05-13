@@ -12,6 +12,11 @@ db.sqlite3
 staticfiles/
 media/
 
+# Django migrations (ignoradas por preferencia — cada entorno genera las suyas)
+# Se mantiene __init__.py para que Django siga reconociendo el paquete migrations.
+**/migrations/*.py
+!**/migrations/__init__.py
+
 # Logs
 *.log
 err.log
@@ -22,3 +27,5 @@ out.log
 
 # Env
 .env
+
+CLAUDE.md

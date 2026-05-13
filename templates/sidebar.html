@@ -82,7 +82,7 @@
                     <span>Home</span>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="{% url 'users:ping' %}"><i class="fa-solid fa-table"></i> Listado</a></li>
+                    <li><a href="{% url 'users:panel_main' %}"><i class="fa-solid fa-table"></i> Listado</a></li>
                 </ul>
             </li>
             <!-- End Panel -->
@@ -95,7 +95,9 @@
                     <span>Usuarios</span>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="{% url 'users:panel' %}"><i class="fa-regular fa-address-card" style="color: #75a8ff;"></i> Panel Admin</a></li>
+                    <li><a href="{% url 'users:panel_user' %}"><i class="fa-regular fa-address-card" style="color: #75a8ff;"></i> Panel Admin</a></li>
+                    <li><a href="{% url 'users:panel_positions' %}"><i class="fa-solid fa-id-badge" style="color: #ffd35a;"></i> Puestos</a></li>
+                    <li><a href="{% url 'users:panel_areas' %}"><i class="fa-solid fa-sitemap" style="color: #ff8a65;"></i> Áreas</a></li>
                 </ul>
             </li>
             <!-- End Panel-->

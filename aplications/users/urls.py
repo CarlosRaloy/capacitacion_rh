@@ -29,13 +29,25 @@ urlpatterns = [
     path(
         route='panel_user/',
         view=views.user_panel,
-        name='panel'
+        name='panel_user'
+    ),
+
+    path(
+        route='panel_positions/',
+        view=views.panel_positions,
+        name='panel_positions'
+    ),
+
+    path(
+        route='panel_areas/',
+        view=views.panel_areas,
+        name='panel_areas'
     ),
 
     path(
         route='',
         view=views.ping,
-        name='ping'
+        name='panel_main'
     ),
 
     path(
