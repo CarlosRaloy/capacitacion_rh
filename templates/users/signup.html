@@ -1,0 +1,55 @@
+{% extends "users/base10.html" %} <!-- ELIGE LA BASE --->
+{% load static %}
+
+{% block head_content %}
+  <title>Registro</title>
+{% endblock %}
+
+{% block container %}
+  <h2 class="text-center mb-4 text-white">Regístrate</h2>
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {% for err in form.non_field_errors %}{{ err }}<br>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="p-2">
+      <label for="{{ form.username.id_for_label }}" class="form-label text-white">Usuario</label>
+      {{ form.username }}
+      {% for err in form.username.errors %}
+        <div class="invalid-feedback d-block">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="p-2">
+      <label for="{{ form.password.id_for_label }}" class="form-label text-white">Contraseña</label>
+      {{ form.password }}
+      {% for err in form.password.errors %}
+        <div class="invalid-feedback d-block">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="p-2">
+      <label for="{{ form.password_confirmation.id_for_label }}" class="form-label text-white">
+        Confirmar contraseña
+      </label>
+      {{ form.password_confirmation }}
+      {% for err in form.password_confirmation.errors %}
+        <div class="invalid-feedback d-block">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+  <div class="p-2">
+    <button type="submit" class="btn btn-dark w-100">¡Registrarme!</button>
+  </div>
+
+  </form>
+
+  <div class="text-center pt-4">
+    <a href="{% url 'users:login' %}" class="text-info">¿Ya tienes cuenta? Inicia sesión</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,84 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body {
+    background: url("https://wallpapers.com/images/featured/montana-nocturna-2bhotujq381jpvh6.jpg") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Glasmorphism minimalista */
+#auth-container {
+    background: rgba(0, 0, 0, 0.39);
+    border-radius: 10%;
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: none;
+    padding: 2rem 2rem 1.5rem 2rem;
+    margin-top: 2rem;
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.8rem;
+    font-weight: 400;
+    margin-bottom: 1.1rem;
+    box-shadow: none;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: #00e6fe55;
+    color: #00d1da;
+    outline: none;
+}
+
+.btn-dark {
+    background: #232336;
+    color: #fff;
+    border-radius: 0.8rem;
+    font-weight: 500;
+    box-shadow: none;
+    border: none;
+    transition: background .18s;
+}
+
+.btn-dark:hover {
+    background: #2d2f4a;
+}
+
+.alert-danger {
+    border-radius: 0.8rem;
+    background: rgba(255, 0, 110, 0.14);
+    border: none;
+    color: #b6004c;
+    font-weight: 500;
+}
+
+a {
+    color: #00e6fe;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color .18s;
+}
+
+a:hover {
+    color: #ff008c;
+}
+
+.login-logo {
+    max-width: 28%;
+    margin-bottom: 1.2rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.register {
+    color: aliceblue;
+}

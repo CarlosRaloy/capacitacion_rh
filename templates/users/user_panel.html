@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_content %}
+    <title>Usuarios</title>
+{% endblock %}
+
+{% block panel_page %}
+    Panel de usuarios <small>Panel de administración de usuarios</small>
+{% endblock %}
+
+{% block panel_title %}
+    Administracion
+{% endblock %}
+
+
+{% block content %}
+
+<!-- Botón Crear Usuario -->
+<button id="btn-create-user" class="btn btn-success mb-3">
+    <i class="fas fa-user-plus"></i> Crear Usuario
+</button>
+
+<h1><i class="fas fa-users me-2" style="color: #009587"></i> Panel de Usuarios</h1>
+<hr>
+
+<!-- Tabla USUARIOS CORRECTAMENTE CUADRADA -->
+<div class="rwd-container">
+  <table class="table table-bordered table-hover table-sm align-middle rwd-table">
+      <thead class="table-light">
+          <tr>
+              <th>Nombre</th>
+              <th>Usuario</th>
+               <th>Email</th>
+              <th>Nivel</th>
+              <th>Último Acceso</th>
+              <th class="text-center">Acciones</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for user in users %}
+          <tr>
+              <td>{{ user.get_full_name }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                  {% if user.profile.level == 0 %}
+                      <span class="badge bg-secondary">Bloqueado</span>
+                  {% elif user.profile.level == 1 %}
+                      <span class="badge bg-info text-dark">Usuario</span>
+                  {% elif user.profile.level == 2 %}
+                      <span class="badge bg-success">Administrador</span>
+                  {% else %}
+                      <span class="badge bg-warning text-dark">Otro</span>
+                  {% endif %}
+              </td>
+              <td>
+                  {% if user.last_login %}
+                      {{ user.last_login|date:"d/m/Y H:i" }}
+                  {% else %}
+                      <span class="text-muted">Nunca</span>
+                  {% endif %}
+              </td>
+              <td class="text-center">
+                  <button class="btn btn-sm btn-primary btn-edit"
+                          data-id="{{ user.id }}"
+                          data-username="{{ user.username }}"
+                          data-email="{{ user.email }}"
+                          data-first_name="{{ user.first_name }}"
+                          data-last_name="{{ user.last_name }}"
+                          data-level="{{ user.profile.level }}">
+                      <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-delete" data-id="{{ user.id }}">
+                      <i class="fas fa-trash-alt"></i>
+                  </button>
+              </td>
+          </tr>
+          {% empty %}
+          <tr>
+              <td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+<!-- Modal Crear Usuario -->
+<div class="modal fade" id="modal-create-user" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <form id="form-create-user" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-user-plus"></i> Crear Usuario</h5>
+        </div>
+        <div class="modal-body row g-2">
+          <div class="col-md-4">
+            <label>Nombre</label>
+            <input type="text" name="first_name" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label>Apellido</label>
+            <input type="text" name="last_name" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label>Contraseña</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label>Email (opcional)</label>
+            <input type="email" name="email" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label>Nivel</label>
+            <select name="level" class="form-control">
+              <option value="0">Bloqueado</option>
+              <option value="1">Normal</option>
+              <option value="2">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar Usuario -->
+<div class="modal fade" id="modal-edit-user" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <form id="form-edit-user" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="edit">
+      <input type="hidden" name="user_id">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-user-edit"></i> Editar Usuario</h5>
+        </div>
+        <div class="modal-body row g-2">
+          <div class="col-md-4">
+            <label>Nombre</label>
+            <input type="text" name="first_name" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label>Apellido</label>
+            <input type="text" name="last_name" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label>Nivel</label>
+            <select name="level" class="form-control">
+              <option value="0">Bloqueado</option>
+              <option value="1">Normal</option>
+              <option value="2">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Actualizar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Abrir modal Crear Usuario (si existe el botón)
+    const createBtn = document.getElementById("btn-create-user");
+    if (createBtn) {
+        const createModal = new bootstrap.Modal(document.getElementById("modal-create-user"));
+        createBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            createModal.show();
+        });
+    }
+
+    // Enviar formulario CREAR USUARIO
+    $('#form-create-user').submit(function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        $.ajax({
+            url: "{% url 'users:panel' %}",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data.success) {
+                    Swal.fire("✅ Éxito", data.message, "success").then(() => location.reload());
+                } else {
+                    Swal.fire("❌ Error", data.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("❌ Error", "Error inesperado en el servidor", "error");
+            }
+        });
+    });
+
+    // Abrir modal Editar Usuario y precargar datos
+    $(".btn-edit").click(function () {
+        const modal = new bootstrap.Modal(document.getElementById("modal-edit-user"));
+        $("#form-edit-user input[name='user_id']").val($(this).data("id"));
+        $("#form-edit-user input[name='first_name']").val($(this).data("first_name"));
+        $("#form-edit-user input[name='last_name']").val($(this).data("last_name"));
+        $("#form-edit-user input[name='email']").val($(this).data("email"));
+        $("#form-edit-user select[name='level']").val($(this).data("level"));
+        modal.show();
+    });
+
+    // Enviar formulario EDITAR USUARIO
+    $('#form-edit-user').submit(function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        $.ajax({
+            url: "{% url 'users:panel' %}",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data.success) {
+                    Swal.fire("✅ Actualizado", data.message, "success").then(() => location.reload());
+                } else {
+                    Swal.fire("❌ Error", data.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("❌ Error", "Error inesperado en el servidor", "error");
+            }
+        });
+    });
+
+    // Eliminar usuario
+    $(".btn-delete").click(function () {
+        const userId = $(this).data("id");
+        Swal.fire({
+            title: '¿Eliminar usuario?',
+            text: "Esta acción no se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{% url 'users:panel' %}",
+                    method: "POST",
+                    data: {
+                        action: "delete",
+                        user_id: userId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            Swal.fire("✅ Eliminado", data.message, "success").then(() => location.reload());
+                        } else {
+                            Swal.fire("❌ Error", data.message, "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("❌ Error", "Error inesperado al eliminar", "error");
+                    }
+                });
+            }
+        });
+    });
+
+});
+</script>
+{% endblock %}
+

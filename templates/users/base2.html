@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    {% block head_content %}{% endblock %}
+    <link href="{% static 'css/login/b2.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+{% block toast %}{% endblock %}
+    <div class="bg-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="settings-icon" onclick="toggleSettings()"></div>
+
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">Proyecto</span>
+            </div>
+            <p class="logo-subtitle">Descripciondel proyecto</p>
+        </div>
+
+        {% block container %}
+        <!-- Contenido del formulario aquí -->
+        {% endblock %}
+    </div>
+
+    <script>
+        function toggleSettings() {
+            alert('Configuraciones del sistema');
+        }
+
+        function togglePassword() {
+            const passwordInput = document.querySelector('input[name="password"]');
+            const toggle = document.querySelector('.password-toggle');
+
+            if (passwordInput && toggle) {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggle.textContent = '🙈';
+                    toggle.style.color = '#00d4aa';
+                } else {
+                    passwordInput.type = 'password';
+                    toggle.textContent = '🙂';
+                    toggle.style.color = '#a0aec0';
+                }
+            }
+        }
+
+        // Initialize dynamic inputs when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Convert existing form inputs to dynamic inputs
+            const formGroups = document.querySelectorAll('.form-group');
+
+            formGroups.forEach(group => {
+                const input = group.querySelector('.form-control');
+                if (input && !group.querySelector('.input-wrapper')) {
+                    // Create wrapper
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'input-wrapper';
+
+                    // Get input info
+                    const inputType = input.type;
+                    const inputName = input.name;
+                    const placeholder = input.placeholder;
+
+                    // Create floating label
+                    const label = document.createElement('label');
+                    label.className = 'floating-label';
+                    label.textContent = placeholder;
+                    label.setAttribute('for', input.id || inputName);
+
+                    // Create icon
+                    const icon = document.createElement('div');
+                    icon.className = 'input-icon';
+                    if (inputName === 'username' || inputType === 'text') {
+                        icon.textContent = '👤';
+                    } else if (inputType === 'password') {
+                        icon.textContent = '🔒';
+                    } else if (inputType === 'email') {
+                        icon.textContent = '📧';
+                    }
+
+                    // Create underline
+                    const underline = document.createElement('div');
+                    underline.className = 'input-underline';
+
+                    // Modify input
+                    input.style.paddingLeft = '60px';
+                    input.setAttribute('placeholder', inputName);
+
+                    // Add password toggle if needed
+                    if (inputType === 'password') {
+                        const toggle = document.createElement('div');
+                        toggle.className = 'password-toggle';
+                        toggle.textContent = '🙂';
+                        toggle.onclick = togglePassword;
+                        wrapper.appendChild(toggle);
+                    }
+
+                    // Wrap input and add elements
+                    input.parentNode.insertBefore(wrapper, input);
+                    wrapper.appendChild(input);
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(icon);
+                    wrapper.appendChild(underline);
+                }
+            });
+
+            // Add enhanced interactions
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.addEventListener('focus', function() {
+                    const wrapper = this.closest('.input-wrapper');
+                    if (wrapper) {
+                        wrapper.style.transform = 'scale(1.02)';
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    const wrapper = this.closest('.input-wrapper');
+                    if (wrapper) {
+                        wrapper.style.transform = 'scale(1)';
+                    }
+                });
+
+                // Real-time validation
+                input.addEventListener('input', function() {
+                    const wrapper = this.closest('.input-wrapper');
+                    const underline = wrapper?.querySelector('.input-underline');
+
+                    if (this.type === 'email') {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (this.value && !emailRegex.test(this.value)) {
+                            if (underline) underline.style.background = '#f56565';
+                            this.style.borderColor = '#f56565';
+                        } else {
+                            if (underline) underline.style.background = 'linear-gradient(135deg, #00d4aa, #00a085)';
+                            this.style.borderColor = this.value ? '#00d4aa' : '#e2e8f0';
+                        }
+                    }
+
+                    if (this.type === 'password') {
+                        const strength = checkPasswordStrength(this.value);
+                        updatePasswordIndicator(wrapper, strength);
+                    }
+                });
+            });
+
+            // Convert hr to styled divider
+            const hrs = document.querySelectorAll('hr');
+            hrs.forEach(hr => {
+                hr.className = 'divider';
+            });
+
+            // Style register link
+            const registerP = document.querySelector('p:last-of-type');
+            if (registerP && registerP.textContent.includes('registr')) {
+                registerP.className = 'register-link';
+            }
+        });
+
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            return strength;
+        }
+
+        function updatePasswordIndicator(wrapper, strength) {
+            const underline = wrapper?.querySelector('.input-underline');
+            if (!underline) return;
+
+            const colors = ['#f56565', '#ed8936', '#ecc94b', '#48bb78'];
+            const widths = ['25%', '50%', '75%', '100%'];
+
+            if (strength > 0) {
+                underline.style.background = colors[strength - 1];
+                underline.style.width = widths[strength - 1];
+            }
+        }
+
+        // Show message function for Django messages
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                ${type === 'success' ? 'background: #48bb78;' : 'background: #f56565;'}
+            `;
+
+            document.body.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+    </script>
+
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,207 @@
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: url("https://images.pexels.com/photos/5006967/pexels-photo-5006967.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1") no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    position: relative;
+    font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 34, 43, 0.36);
+    z-index: 1;
+}
+
+.main-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-section {
+    padding: 0 5vw 0 7vw;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.welcome-title {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 1.2rem;
+}
+
+.welcome-desc {
+    font-size: 1.13rem;
+    max-width: 480px;
+    opacity: 0.96;
+}
+
+.login-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Glassmorphism wrapper */
+.login-glass-wrapper {
+    width: 460px;
+    min-height: 370px;
+    padding: 2.5rem 2.6rem 2rem 2.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    border-radius: 2.1rem;
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 8px 40px 0 rgba(80, 100, 140, 0.14), 0 1.5px 10px 0 rgba(240, 240, 255, 0.06);
+    backdrop-filter: blur(10px) saturate(125%);
+    -webkit-backdrop-filter: blur(28px) saturate(125%);
+    border: 1.4px solid rgba(255, 255, 255, 0.24);
+    position: relative;
+}
+
+.login-glass-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 2.1rem;
+    pointer-events: none;
+    background: linear-gradient(130deg, rgba(255, 255, 255, 0.13) 30%, rgba(255, 255, 255, 0.05) 90%);
+    z-index: 0;
+}
+
+.login-glass-wrapper form, .login-glass-wrapper > form {
+    position: relative;
+    z-index: 1;
+}
+
+.login-glass-wrapper .form-group {
+    width: 100%;
+    margin-bottom: 1.25rem;
+}
+
+.login-glass-wrapper .form-control {
+    background: rgba(255, 255, 255, 0.29);
+    border: 1.2px solid rgba(255, 255, 255, 0.38);
+    border-radius: 1.3rem;
+    box-shadow: 0 3px 16px 0 rgba(130, 160, 200, 0.12);
+    backdrop-filter: blur(16px) saturate(115%);
+    -webkit-backdrop-filter: blur(16px) saturate(115%);
+    color: #242f3b;
+    font-size: 1.09rem;
+    padding: 1.07rem 1.24rem;
+    font-weight: 500;
+    transition: border-color .17s, box-shadow .15s, background .14s;
+}
+
+.login-glass-wrapper .form-control:focus {
+    background: rgba(255, 255, 255, 0.36);
+    border-color: #a3cafb;
+    box-shadow: 0 0 0 3px #b3e0ff55, 0 4px 14px rgba(175, 200, 230, 0.16);
+    outline: none;
+}
+
+.login-glass-wrapper .form-control::placeholder {
+    color: #9fa9bb;
+    opacity: 1;
+    font-weight: 400;
+}
+
+.login-glass-wrapper .btn-dark,
+.login-glass-wrapper .btn-primary {
+    border-radius: 1.3rem;
+    background: rgba(0, 22, 62, 0.95);
+    border: 1.2px solid rgba(255, 255, 255, 0.36);
+    color: #eaeaea;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 10px #d6e3f333;
+    padding: 0.96rem 0;
+    width: 100%;
+    transition: background .13s, color .12s, box-shadow .13s, border-color .13s;
+    backdrop-filter: blur(14px) saturate(116%);
+    -webkit-backdrop-filter: blur(14px) saturate(116%);
+}
+
+.login-glass-wrapper .btn-dark:hover,
+.login-glass-wrapper .btn-primary:hover {
+    background: rgb(0, 0, 0);
+    color: #ffffff;
+    border-color: #e2e9f8;
+    box-shadow: 0 7px 22px #d3eafd88;
+}
+
+.login-glass-wrapper .register {
+    color: #002a5a;
+    font-weight: 500;
+    font-size: .99rem;
+    margin-top: 0.7rem;
+    width: 100%;
+    text-align: left;
+}
+
+.login-glass-wrapper .register a {
+    color: #006750;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.login-glass-wrapper .register a:hover {
+    color: #0e1727;
+}
+
+.alert-danger {
+    border-radius: 1rem;
+    background: rgba(255, 80, 80, 0.11);
+    border: none;
+    color: #be0a4c;
+    font-weight: 600;
+    width: 100%;
+}
+
+@media (max-width: 1050px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome-section {
+        padding: 2.5rem 5vw 1.5rem 5vw;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-section {
+        min-height: auto;
+        padding-bottom: 2.5rem;
+    }
+}
+
+@media (max-width: 650px) {
+    .login-glass-wrapper {
+        width: 97vw;
+        max-width: 98vw;
+        min-width: 0;
+        padding: 1.7rem 0.3rem 1.2rem 0.3rem;
+    }
+}

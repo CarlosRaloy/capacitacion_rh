@@ -1,0 +1,217 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body {
+    background: #fff;
+    min-height: 100vh;
+    font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+}
+
+.split-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.welcome-panel {
+    flex: 1 1 62%;
+    max-width: 70vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    min-height: 100vh;
+    padding: 0;
+    /* Imagen protagonista */
+    background: linear-gradient(rgba(246, 246, 246, 0.05), rgba(0, 0, 0, 0.25)),
+    url("https://cdn.prod.website-files.com/5cb5020741d15c62f53013b0/668f2c4d516a0ce29aeb50ed_mojavewallpaper_hero.jpg") no-repeat center center/cover;
+}
+
+.welcome-content {
+    z-index: 1;
+    max-width: 550px;
+    padding: 0 4vw 0 7vw;
+}
+
+.welcome-title {
+    font-size: 2.85rem;
+    font-weight: 800;
+    line-height: 1.09;
+    margin-bottom: 1.1rem;
+    letter-spacing: -1.5px;
+    color: #fff;
+}
+
+.welcome-desc {
+    font-size: 1.21rem;
+    margin-bottom: 1.9rem;
+    opacity: 0.94;
+    color: #fff;
+}
+
+.login-panel {
+    flex: 1 1 38%;
+    max-width: 38vw;
+    background: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 4vw;
+}
+
+.login-box {
+    width: 350px;
+    max-width: 95vw;
+    border-radius: 1rem;
+    box-shadow: 0 6px 38px 0 rgba(98, 57, 174, 0.13);
+    background: #fff;
+    padding: 2.5rem 2rem 2.1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.login-box h2 {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #005185;
+    letter-spacing: 0.7px;
+    margin-bottom: 2.2rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.login-box .form-group {
+    margin-bottom: 1.10rem;
+    position: relative;
+}
+
+.login-box .form-control {
+    background: #f4f7fa;
+    border: none;
+    border-radius: 1.25rem;
+    color: #000943;
+    font-size: 1.05rem;
+    font-weight: 500;
+    box-shadow: none;
+    padding: 0.86rem 1rem;
+    transition: background .14s, border-color .13s;
+    height: 2.05rem;
+}
+
+.login-box .form-control:focus {
+    background: #fff;
+    outline: none;
+    border: 1.5px solid #8b7efb;
+}
+
+.login-box .form-control::placeholder {
+    color: #aab2d3;
+    opacity: 1;
+}
+
+/* BOTÓN 100% ANCHO, CENTRADO, GRADIENTE Y TEXTO CENTRADO */
+.login-box .btn-dark,
+.login-box .btn-primary {
+    border-radius: 1.25rem;
+    background: linear-gradient(90deg, #003f61 0%, #002750 100%);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    padding: 0.92rem 0;
+    font-size: 1.09rem;
+    width: 100%;
+    margin-top: 0.6rem;
+    height: 2.20rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center !important;
+    box-shadow: 0 2px 10px #d3bbfa55;
+    transition: background .14s, box-shadow .13s;
+}
+
+.login-box .btn-dark:hover,
+.login-box .btn-primary:hover {
+    background: linear-gradient(90deg, #002b4a 0%, #001f20 100%);
+    color: #fff;
+    box-shadow: 0 6px 18px #b2cdf655;
+}
+
+.login-box .register {
+    color: #0b62c8;
+    font-size: 1rem;
+    margin-top: 1.0rem;
+    text-align: center;
+}
+
+.login-box .register a {
+    color: #ff5e62;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.alert-danger {
+    border-radius: 1rem;
+    background: #f7e8fa;
+    border: none;
+    color: #cf4862;
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+@media (max-width: 1200px) {
+    .welcome-panel {
+        max-width: 100vw;
+    }
+
+    .login-panel {
+        max-width: 100vw;
+    }
+}
+
+@media (max-width: 950px) {
+    .split-container {
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .welcome-panel, .login-panel {
+        min-height: 40vh;
+        max-width: 100vw;
+    }
+
+    .welcome-content {
+        padding: 2.5rem 5vw 2.5rem 5vw;
+    }
+
+    .login-box {
+        margin-top: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .login-box {
+        width: 99vw;
+        min-width: 0;
+        padding: 1.3rem 0.3rem 1.0rem 0.3rem;
+    }
+
+    .welcome-content {
+        max-width: 95vw;
+        padding: 2rem 2vw 2rem 2vw;
+    }
+}

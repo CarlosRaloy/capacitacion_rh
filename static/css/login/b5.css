@@ -1,0 +1,167 @@
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* Fondo imagen a pantalla completa */
+    background: url("https://4kwallpapers.com/images/wallpapers/lake-mountains-rocks-evening-scenery-illustration-macos-big-2560x1440-3780.jpg") no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-outer {
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card-blue {
+    width: 430px;
+    max-width: 98vw;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 64px 0 rgba(52, 76, 180, 0.20), 0 1.5px 12px 0 rgba(70, 120, 220, 0.09);
+    background: #fff;
+    overflow: hidden;
+    margin: 3vh 1vw;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+}
+
+.login-card-blue .login-image-top {
+    width: 100%;
+    height: 170px;
+    background: #183b66;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.login-card-blue .login-image-top img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+}
+
+.login-card-blue .login-content {
+    padding: 2.7rem 2.4rem 1.7rem 2.4rem;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+}
+
+.login-card-blue h2 {
+    font-weight: 800;
+    font-size: 1.55rem;
+    color: #28467a;
+    letter-spacing: -1px;
+    margin-bottom: 1.7rem;
+    text-align: left;
+}
+
+.login-card-blue .form-group {
+    margin-bottom: 1.10rem;
+    position: relative;
+}
+
+/* INPUT FLAT Y DELGADO */
+.login-card-blue .form-control {
+    background: #e3edfb;
+    border: none;
+    border-radius: 10px;
+    color: #254975;
+    font-size: 1.03rem;
+    font-weight: 500;
+    box-shadow: none;
+    padding: 0.73rem 1rem;
+    transition: background .14s, border-color .13s;
+    height: 2.1rem;
+}
+
+.login-card-blue .form-control:focus {
+    background: #f3f8ff;
+    outline: none;
+    border: 1.4px solid #92b5e6;
+}
+
+.login-card-blue .form-control::placeholder {
+    color: #8aa1c7;
+    opacity: 1;
+}
+
+/* BOTÓN ANCHO Y RECTANGULAR */
+.login-card-blue .btn-dark,
+.login-card-blue .btn-primary {
+    border-radius: 20px;
+    background: linear-gradient(90deg, #404d8c 60%, #7863d6 100%);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 2px 10px #b2cdf644;
+    font-size: 1.13rem;
+    width: 100%;
+    margin-top: 20px;
+    transition: background .12s, box-shadow .12s;
+    height: 2.3rem;
+    display: block;
+}
+
+.login-card-blue .btn-dark:hover,
+.login-card-blue .btn-primary:hover {
+    background: linear-gradient(90deg, #667cdf 60%, #927bff 100%);
+    color: #fff;
+    box-shadow: 0 6px 18px #b2cdf655;
+}
+
+.login-card-blue .register {
+    color: #4172bb;
+    font-size: 1rem;
+    margin-top: 1.1rem;
+    text-align: center;
+}
+
+.login-card-blue .register a {
+    color: #28467a;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.alert-danger {
+    border-radius: 1rem;
+    background: #e3edfb;
+    border: none;
+    color: #244689;
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .login-card-blue {
+        width: 99vw;
+        min-width: 0;
+        padding: 0;
+    }
+
+    .login-card-blue .login-content {
+        padding: 1.4rem 0.2rem 0.8rem 0.2rem;
+    }
+}

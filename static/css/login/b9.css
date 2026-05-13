@@ -1,0 +1,217 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body {
+    min-height: 100vh;
+    min-width: 100vw;
+    font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+    background: url("https://images.pexels.com/photos/548084/pexels-photo-548084.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1") no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blob-login-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blob-card-login {
+    width: 470px;
+    max-width: 98vw;
+    min-height: 610px;
+    padding: 3.2rem 2.2rem 2.5rem 2.2rem;
+    background: rgba(255, 255, 255, 0.21);
+    border-radius: 70% 30% 25% 75% / 69% 30% 70% 31%;
+    box-shadow: 0 10px 60px 0 rgba(60, 60, 60, 0.19), 0 2px 14px 0 rgba(41, 41, 41, 0.09);
+    backdrop-filter: blur(17px) saturate(145%);
+    -webkit-backdrop-filter: blur(17px) saturate(145%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    margin: 0 auto;
+    animation: morph 16s infinite linear alternate;
+}
+
+@keyframes morph {
+    0% {
+        border-radius: 31% 69% 42% 58% / 43% 46% 54% 57%;
+    }
+    40% {
+        border-radius: 23% 77% 28% 72% / 67% 26% 74% 33%;
+    }
+    60% {
+        border-radius: 73% 27% 60% 40% / 30% 59% 41% 70%;
+    }
+    100% {
+        border-radius: 83% 17% 68% 32% / 21% 84% 16% 79%;
+    }
+}
+
+.blob-card-title {
+    font-family: 'Righteous', cursive;
+    color: #fff;
+    font-size: 2.3rem;
+    font-weight: 900;
+    letter-spacing: .5px;
+    text-shadow: 0 2px 18px rgba(40, 40, 60, 0.16);
+    text-align: center;
+    margin-top: 0.7rem;
+    margin-bottom: 1.7rem;
+    z-index: 2;
+    width: 100%;
+    position: relative;
+}
+
+.blob-form-wrapper {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+    position: relative;
+}
+
+.blob-form-wrapper h2 {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #232323;
+    margin-bottom: 1.10rem;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.blob-form-wrapper .form-group {
+    width: 100%;
+    margin-bottom: 1.10rem;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.blob-form-wrapper .form-control {
+    background: rgba(255, 255, 255, 0.93);
+    border: 1px solid rgba(70, 70, 100, 0.09);
+    border-radius: 1.7rem;
+    color: #484868;
+    font-size: 1.18rem;
+    font-weight: 500;
+    box-shadow: 0 1px 8px 0 rgba(70, 90, 160, 0.06);
+    padding: 1rem 1.15rem;
+    transition: background .13s, border-color .11s;
+    width: 100%;
+    text-align: center;
+}
+
+.blob-form-wrapper .form-control:focus {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1.4px solid #232323;
+    outline: none;
+}
+
+.blob-form-wrapper .form-control::placeholder {
+    color: #7a8db5;
+    opacity: 1;
+}
+
+.blob-form-wrapper .btn-dark,
+.blob-form-wrapper .btn-primary {
+    border-radius: 1.7rem;
+    background: linear-gradient(90deg, #232323 0%, #474747 100%);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 2px 14px rgba(30, 30, 30, 0.17);
+    padding: 1.12rem 0;
+    font-size: 1.34rem;
+    width: 100%;
+    margin-top: 0.8rem;
+    height: 2.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center !important;
+    transition: background .14s, box-shadow .13s;
+}
+
+.blob-form-wrapper .btn-dark:hover,
+.blob-form-wrapper .btn-primary:hover {
+    background: linear-gradient(90deg, #404040 0%, #000000 100%);
+    color: #fff;
+    box-shadow: 0 7px 22px rgba(40, 40, 40, 0.22);
+}
+
+.blob-form-wrapper .register {
+    color: #232323;
+    font-size: 1rem;
+    margin-top: 1.1rem;
+    text-align: center;
+}
+
+.blob-form-wrapper .register a {
+    color: #000;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.alert-danger {
+    border-radius: 1rem;
+    background: rgba(255, 230, 252, 0.98);
+    border: none;
+    color: #68488e;
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* ------- OLA glassmorphism animada -------- */
+.glass-wave {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    min-width: 300px;
+    height: 70px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.glass-wave svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .blob-card-login {
+        width: 99vw;
+        min-width: 0;
+        min-height: 340px;
+        padding: 1.3rem 0.4rem 1.2rem 0.4rem;
+    }
+
+    .blob-card-title {
+        font-size: 1.1rem;
+        margin-top: 0.4rem;
+    }
+
+    .blob-form-wrapper {
+        padding: 0;
+        max-width: 98vw;
+    }
+}

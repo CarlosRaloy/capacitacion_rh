@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+
+        <div class="row justify-content-md-center">
+            <div class="col-6 p-4" id="profile-box">
+
+                <form action="{% url 'users:update_profile' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                        <p class="alert alert-danger">{{ form.errors }}</p>
+                    {% endif %}
+
+                    <div class="media">
+                            {% if profile.picture %}
+                            <img src="{{ profile.picture.url }}" class="rounded-circle" width="50" height="50" />
+                            {% else %}
+                            <img src="{% static 'img/user.png' %}" class="rounded-circle" height="50" />
+                            {% endif %}
+
+                        <div class="media-body">
+                            <h5 class="ml-4">@{{ user.username }} | {{ user.get_full_name }}</h5>
+
+                            <p class="ml-4"><input type="file" name="picture" value="{% if form.errors %}{{ form.picture.value }}{% else %}{{ profile.picture }}{% endif %}"></p>
+
+                        </div>
+                    </div>
+
+                    {% for error in form.picture.errors %}
+                    <div class="alert alert-danger">
+                        <p>Imagen Error :</p>{{ error }}
+                    </div>
+                    {% endfor %}
+
+                    <hr><br>
+
+                        <label>Tema</label>
+                        <select name="theme" id="id_theme" class="form-control personal-select">
+                          <option value="{{ profile.theme }}" selected>{{ profile.theme }}</option>
+                          <option value="transparent">Transparent</option>
+                          <option value="apple">Apple</option>
+                          <option value="default">Default</option>
+                          <option value="facebook">Facebook</option>
+                          <option value="google">Google</option>
+                          <option value="material">Material</option>
+                        </select>
+
+                        <div class="invalid-feedback">
+                            {% for error in form.theme.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+
+                    <button type="submit" class="btn btn-dark btn-block mt-5">Actualizar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,236 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body {
+    background: radial-gradient(ellipse at 70% 100%, #19006c 0%, #0e0000 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.centered-card-glass {
+    width: 900px;
+    max-width: 99vw;
+    min-height: 480px;
+    border-radius: 2rem;
+    background: none;
+    box-shadow: 0 10px 46px 0 rgba(80, 100, 140, 0.16), 0 2px 8px 0 rgba(100, 160, 255, 0.08);
+    display: flex;
+    overflow: hidden;
+    margin: 7vh auto;
+}
+
+.card-img-side {
+    flex: 1 1 46%;
+    min-width: 260px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    border-top-left-radius: 2rem;
+    border-bottom-left-radius: 2rem;
+    overflow: hidden;
+    background: #e6eeff;
+}
+
+.card-img-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(140deg, rgba(24, 33, 60, 0.12) 0%, rgba(37, 51, 80, 0.12) 100%);
+    z-index: 1;
+}
+
+.card-img-content {
+    position: relative;
+    z-index: 2;
+    padding: 2.6rem 1.5rem 2.6rem 2.1rem;
+    width: 100%;
+    color: #122235;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.card-img-content .side-title {
+    font-size: 1.13rem;
+    font-weight: 600;
+    margin-top: 1.2rem;
+    color: #fff;
+    letter-spacing: .2px;
+    text-shadow: 0 2px 12px rgba(12, 12, 40, 0.22);
+}
+
+.card-img-content .side-welcome {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1.6rem;
+    margin-top: 0.4rem;
+    letter-spacing: .2px;
+    text-shadow: 0 2px 14px rgba(12, 12, 40, 0.22);
+}
+
+/* --- FORMULARIO GLASS --- */
+.card-form-side {
+    flex: 1 1 54%;
+    min-width: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    padding: 2.9rem 2.7rem 2.2rem 2.7rem;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 8px 32px 0 rgba(78, 128, 239, 0.13);
+    backdrop-filter: blur(22px) saturate(135%);
+    -webkit-backdrop-filter: blur(22px) saturate(135%);
+    border-top-right-radius: 2rem;
+    border-bottom-right-radius: 2rem;
+    border-left: 1px solid rgba(163, 185, 255, 0.12);
+    position: relative;
+}
+
+.card-form-side h2 {
+    font-size: 1.32rem;
+    font-weight: 700;
+    color: #25477a;
+    letter-spacing: 1px;
+    margin-bottom: 1.7rem;
+    text-align: left;
+}
+
+.card-form-side .form-group {
+    margin-bottom: 1.1rem;
+    position: relative;
+}
+
+.card-form-side .form-control {
+    background: #eaf3ff;
+    border: none;
+    border-radius: 1.3rem;
+    color: #21345c;
+    font-size: 1.08rem;
+    font-weight: 500;
+    box-shadow: none;
+    padding: 0.83rem 1rem;
+    transition: background .14s, border-color .13s;
+    height: 2.05rem;
+}
+
+.card-form-side .form-control:focus {
+    background: #fff;
+    outline: none;
+    border: 1.4px solid #355d98;
+}
+
+.card-form-side .form-control::placeholder {
+    color: #7287a7;
+    opacity: 1;
+}
+
+/* BOTÓN GLASSY AZUL OSCURO */
+.card-form-side .btn-dark,
+.card-form-side .btn-primary {
+    border-radius: 1.3rem;
+    background: linear-gradient(90deg, #0b2451 0%, #3566b5 100%);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 2px 12px #13337a33;
+    padding: 0.92rem 0;
+    font-size: 1.13rem;
+    width: 100%;
+    margin-top: 0.6rem;
+    height: 2.22rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center !important;
+    transition: background .14s, box-shadow .13s;
+}
+
+.card-form-side .btn-dark:hover,
+.card-form-side .btn-primary:hover {
+    background: linear-gradient(90deg, #223e6e 0%, #27437c 100%);
+    color: #fff;
+    box-shadow: 0 6px 18px #34568555;
+}
+
+.card-form-side .register {
+    color: #224ca8;
+    font-size: 1rem;
+    margin-top: 1.0rem;
+    text-align: left;
+}
+
+.card-form-side .register a {
+    color: #2b65cc;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.alert-danger {
+    border-radius: 1rem;
+    background: #eaf2fc;
+    border: none;
+    color: #274577;
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+@media (max-width: 1100px) {
+    .centered-card-glass {
+        width: 99vw;
+    }
+
+    .card-img-side {
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 950px) {
+    .centered-card-glass {
+        flex-direction: column;
+        min-width: 320px;
+        max-width: 98vw;
+    }
+
+    .card-img-side, .card-form-side {
+        width: 100%;
+        min-width: 0;
+        min-height: 190px;
+    }
+
+    .card-form-side {
+        padding: 2rem 1.2rem 1.3rem 1.2rem;
+    }
+
+    .card-img-content {
+        padding: 1.2rem 1.3rem 1.2rem 1.3rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .centered-card-glass {
+        width: 99vw;
+        min-width: 0;
+    }
+}

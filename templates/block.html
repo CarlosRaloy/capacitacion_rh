@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head_content %}
+<title>Bloqueado</title>
+{% endblock %}
+
+{% block panel_page %}Panel Principal <small class="muted">vista rápida de los datos</small>{% endblock %}
+{% block panel_title %}Bloqueado{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="card shadow-lg border-0" style="max-width: 520px; border-radius: 18px;">
+    <div class="card-body p-5 text-center">
+
+      <div class="mb-4">
+      </div>
+
+      <h2 class="fw-bold mb-3" style="color: #1e293b;">
+        Acceso Restringido
+      </h2>
+
+      <p class="text-muted mb-4" style="font-size: 1rem;">
+        Tu cuenta se encuentra temporalmente <strong>bloqueada</strong>.
+        Esto puede deberse a restricciones de acceso o revisión administrativa.
+        <br><br>
+        Por favor, ponte en contacto con un administrador para recuperar tu acceso.
+      </p>
+
+      <div class="d-flex justify-content-center gap-3">
+        <a href="{% url 'users:logout' %}"
+           class="btn btn-danger px-4 py-2"
+           style="border-radius: 10px;">
+          <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+</script>
+{% endblock %}

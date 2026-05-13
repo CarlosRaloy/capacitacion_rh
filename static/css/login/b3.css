@@ -1,0 +1,113 @@
+
+html, body {
+    height: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: url("https://c4.wallpaperflare.com/wallpaper/204/1016/10/fallout-fallout-4-bethesda-softworks-wallpaper-preview.jpg") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Neumorphism login */
+#auth-container {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 2rem;
+    box-shadow: 0 4px 24px 0 #b2b6be55,
+    0 -4px 24px 0 #ffffff11;
+    padding: 2.6rem 2.6rem 2rem 2.6rem;
+    margin-top: 2rem;
+    backdrop-filter: blur(12px) saturate(115%);
+    -webkit-backdrop-filter: blur(12px) saturate(115%);
+    border: none;
+}
+
+.form-group {
+    margin-bottom: 1.55rem !important; /* Más separación entre inputs */
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.96);
+    border: none;
+    border-radius: 1.1rem;
+    box-shadow: 2px 2px 8px #d8dbdf55,
+    -2px -2px 8px #fff3;
+    transition: box-shadow 0.26s, background 0.22s;
+    color: #30425c;
+    font-size: 1.04rem;
+    font-weight: 500;
+    padding: 0.85rem 1.15rem;
+}
+
+.form-control:focus {
+    background: #f7fbff;
+    box-shadow: 0 0 0 2.5px #97e6ff38,
+    2px 2px 8px #c2e0ee44,
+    -2px -2px 8px #fff5;
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #b1bac6;
+    opacity: 1;
+    transition: color .23s;
+}
+
+.form-control:focus::placeholder {
+    color: #8ac0dd;
+}
+
+.btn-dark {
+    background: #eef4fa;
+    color: #374c67;
+    border: none;
+    border-radius: 1.1rem;
+    font-weight: 700;
+    box-shadow: 1.5px 1.5px 6px #c2e0ee66,
+    -1.5px -1.5px 6px #fff3;
+    transition: box-shadow 0.18s, background 0.14s, color 0.13s;
+    padding: 0.7rem 1.3rem;
+    margin-top: 0.2rem;
+}
+
+.btn-dark:hover {
+    background: #d1e7f9;
+    color: #2d425c;
+    box-shadow: 0 2px 10px #97e6ff33;
+}
+
+.alert-danger {
+    border-radius: 1rem;
+    background: rgba(255, 80, 80, 0.11);
+    border: none;
+    color: #be0a4c;
+    font-weight: 600;
+}
+
+.register {
+    color: #5c5c6d;
+    text-align: center;
+    margin-top: 1.2rem;
+}
+
+.register a {
+    color: #82cfff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register a:hover {
+    color: #2d425c;
+    text-decoration: underline;
+}
+
+.login-logo {
+    max-width: 30%;
+    margin-bottom: 1.2rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    filter: drop-shadow(0 4px 12px #aed0e4cc);
+}

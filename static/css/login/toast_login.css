@@ -1,0 +1,170 @@
+/* ==== IMPORTAR TIPOGRAFÍA ==== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+/* ==== VARIABLES DE COLOR ==== */
+:root {
+  /* oranges */
+  --color-orange-400: oklch(0.75 0.183 55.934);
+  --color-orange-950: oklch(0.266 0.079 36.259);
+  /* yellows */
+  --color-yellow-300: oklch(0.905 0.182 98.111);
+  --color-yellow-400: oklch(0.852 0.199 91.936);
+  --color-yellow-700: oklch(0.554 0.135 66.442);
+  --color-yellow-800: oklch(0.476 0.114 61.907);
+  /* grays */
+  --color-gray-900: oklch(0.21 0.006 285.885);
+  --color-gray-100: oklch(0.967 0.001 286.375);
+  --color-gray-300: oklch(0.871 0.006 286.286);
+}
+
+/* ==== CONTENEDOR FIJO ==== */
+#toast-achievement {
+  position: fixed;
+  top: 2rem;
+  right: 1rem;
+  z-index: 1050;
+  font-family: "Inter", sans-serif;
+  pointer-events: none;
+  /* para ocultar tras animar */
+  transition: opacity .4s, transform .4s;
+
+}
+
+/* ==== FONDO OSCURO ===== */
+#toast-achievement main,
+#toast-achievement {
+  background: none;
+}
+
+/* ==== BLOQUE PRINCIPAL ==== */
+#toast-achievement .achievement {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-right: 2.5rem;
+  border-radius: 3rem;
+  background: linear-gradient(
+    90deg,
+    color-mix(in hsl, var(--color-orange-950) 60%, black),
+    color-mix(in hsl, var(--color-orange-950) 30%, black)
+  );
+  color: var(--color-gray-300);
+  border: 1px solid color-mix(in hsl, var(--color-yellow-300), black 70%);
+  overflow: hidden;
+  animation: toast-float 4s ease-in-out forwards;
+}
+
+/* ==== FLOTAR ==== */
+@keyframes toast-float {
+    0%, 100% {transform: translateY(0);}
+    50% {transform: translateY(-20px);}
+}
+
+
+/* ==== CHISPAS ==== */
+#toast-achievement .spark-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+#toast-achievement .spark {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: white;
+  transform-origin: center;
+  animation: spark-animation 5s linear both infinite;
+}
+@keyframes spark-animation {
+  0%   { opacity:0; transform:scale(0) rotate(-180deg); }
+  8%   { opacity:1; transform:scale(1) rotate(0deg); }
+  12%  { opacity:1; transform:scale(1) rotate(90deg); }
+  16%,100% { opacity:0; transform:scale(0) rotate(180deg); }
+}
+#toast-achievement .spark:nth-child(1) {
+  --spark-size:12px; top:10%; left:10%;
+}
+#toast-achievement .spark:nth-child(2) {
+  --spark-size:14px; animation-delay:200ms;
+  top:35%; left:100%;
+}
+#toast-achievement .spark:nth-child(3) {
+  --spark-size:10px; animation-delay:400ms;
+  top:95%; left:20%;
+}
+#toast-achievement .spark svg {
+  width: var(--spark-size);
+  height: var(--spark-size);
+}
+
+/* ==== CÍRCULO EXTERNO ==== */
+#toast-achievement .icon-outer-container {
+  position: relative;
+  z-index: 2;
+}
+#toast-achievement .icon-inner-container {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 4.5rem; height: 4.5rem;
+  border-radius: 50%;
+  background-image: radial-gradient(
+    circle at center,
+    var(--color-yellow-400) 80%,
+    var(--color-yellow-800) 100%
+  );
+  overflow: hidden;
+}
+
+/* ==== DESTELLOS MOVIENTES ==== */
+#toast-achievement .highlight {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: 1;
+  background-image: linear-gradient(
+    120deg,
+    transparent 40%, rgba(255,255,255,.7) 40%,
+    rgba(255,255,255,.7) 44%, transparent 44%,
+    transparent 56%, rgba(255,255,255,.7) 56%,
+    rgba(255,255,255,.7) 68%, transparent 68%
+  );
+  animation: slide 5s ease-in-out infinite both;
+}
+@keyframes slide {
+  0%   { transform: translateX(-100%); }
+  50%,100% { transform: translateX(100%); }
+}
+
+/* ==== ÍCONO INTERNO ==== */
+#toast-achievement .icon {
+  position: relative;
+  display: grid; place-items: center;
+  width: 3.5rem; padding: .2rem;
+  border-radius: inherit;
+  background-color: var(--color-orange-400);
+  box-shadow:
+    0 0 10px hsl(from var(--color-orange-950) h s l / 60%) inset,
+    0 2px  2px hsl(from var(--color-orange-950) h s l / 30%) inset,
+    1px 1px  1px hsl(from var(--color-gray-100) h s l / 50%);
+}
+#toast-achievement .icon svg {
+  width:100%; height:100%;
+  color: var(--color-yellow-300);
+  filter: drop-shadow(0 0 2px var(--color-yellow-700));
+}
+
+/* ==== TEXTO ==== */
+#toast-achievement .content {
+  display:flex; flex-direction:column; gap:.1rem; z-index:2;
+}
+#toast-achievement .title {
+  font-size:1rem; font-weight:700; line-height:1.25;
+  color: var(--color-yellow-300);
+}
+#toast-achievement .description {
+  font-size:.875rem; line-height:1.5; font-weight:400;
+  opacity:.75; color: var(--color-gray-100);
+}

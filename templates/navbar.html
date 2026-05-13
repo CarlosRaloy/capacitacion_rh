@@ -1,0 +1,41 @@
+{% load static %}
+<div id="header" class="header navbar-default navbar-expand">
+ <!--navbar expand-lg bg-body-tertiary neumorphism-->
+    <!-- begin navbar-header -->
+    <div class="navbar-header">
+        <a href="#" class="navbar-brand bg-body-tertiary">
+            <i class="fa-solid fa-droplet" style="color: #e0b000;"></i> &nbsp;<b>Proyecto</span> |</b> <div style="margin-left: 5px;">Raloy</div></a>
+        <button type="button" class="navbar-toggle" data-click="sidebar-toggled">
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <!-- end navbar-header --><!-- begin header-nav -->
+    <ul class="navbar-nav navbar-right">
+        <li class="navbar-form">
+                <div class="form-group">
+                </div>
+        </li>
+
+        <!----------------------------------------->
+
+        <li class="dropdown navbar-user">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <div class="image">
+                    {% if request.user.profile.picture %}
+                    <img src="{{ request.user.profile.picture.url }}" class="rounded-circle" width="50"
+                         height="50"/>
+                    {% else %}
+                    <img src="{% static 'img/user.png' %}" class="rounded-circle" height="50"/>
+                    {% endif %}
+                </div>
+                <span class="d-none d-md-inline"><span id="id_user"></span></span> <b class="caret"></b>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a href="#" class="dropdown-item">Editar Perfil</a>
+                <div class="dropdown-divider"></div>
+                <a href="{% url 'users:login' %}" class="dropdown-item">Salir</a>
+            </div>
+        </li>
+    </ul>
+    <!-- end header navigation right -->
+</div>

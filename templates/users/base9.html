@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    {% block head_content %}{% endblock %}
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Righteous&display=swap" rel="stylesheet">
+    <link href="{% static 'css/login/b9.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+{% block toast %}{% endblock %}
+    <div class="blob-login-container">
+      <div class="blob-card-login">
+          <div class="blob-card-title">Proyecto #</div>
+          <div class="blob-form-wrapper">
+              {% block container %}
+              {% endblock %}
+          </div>
+          <!-- OLA glass animada -->
+          <div class="glass-wave">
+            <svg viewBox="0 0 500 70" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fff" stop-opacity="0.77"/>
+                  <stop offset="100%" stop-color="#fff" stop-opacity="0.12"/>
+                </linearGradient>
+                <filter id="blurMe" x="-10%" y="-30%" width="120%" height="200%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="7" />
+                </filter>
+              </defs>
+              <path id="waveAnim"
+                    fill="url(#glassGrad)"
+                    filter="url(#blurMe)">
+                <animate attributeName="d"
+                    dur="9s"
+                    repeatCount="indefinite"
+                    values="
+                    M0,60 Q70,45 130,62 T260,58 T400,68 T500,56 V70 H0Z;
+                    M0,63 Q80,70 150,55 T290,75 T400,50 T500,66 V70 H0Z;
+                    M0,60 Q70,45 130,62 T260,58 T400,68 T500,56 V70 H0Z
+                    "
+                />
+              </path>
+            </svg>
+          </div>
+      </div>
+    </div>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

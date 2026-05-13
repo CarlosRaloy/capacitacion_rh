@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% load static %}
+    {% block head_content %}{% endblock %}
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Estilos -->
+    <link href="{% static 'css/login/b10.css' %}" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="{% static 'img/icon.png' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+{% block toast %}{% endblock %}
+
+    <!-- Background Layer (usa tu imagen /static/img/login/backgroung.jpg) -->
+    <div class="background-layer"
+         style="--bg-image: url('{% static 'img/login/raloy-bg.webp' %}');">
+        <!-- Overlay tenue para legibilidad -->
+        <div class="bg-image-overlay"></div>
+
+        <!-- Animated Particles -->
+        <div class="bg-particles">
+            <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+            <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+            <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+
+        <!-- Floating Elements -->
+        <div class="floating-elements">
+            <div class="floating-shape shape-1"></div>
+            <div class="floating-shape shape-2"></div>
+            <div class="floating-shape shape-3"></div>
+            <div class="floating-shape shape-4"></div>
+        </div>
+    </div>
+
+    <!-- Settings Icon (Font Awesome) -->
+    <div class="settings-icon" onclick="toggleSettings()">
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+    </div>
+
+    <!-- Main Login Container -->
+    <div class="login-container">
+        <div class="glass-background"></div>
+        <div class="neomorphic-border"></div>
+
+        <div class="container-content">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <!-- Ícono sobrio para PNC -->
+                        <i class="fa-solid fa-clipboard-check" aria-hidden="true" style="color: #FFC107"></i>
+                        <!-- Alternativa:
+                        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                        -->
+                    </div>
+                    <span class="logo-text">Nombre Proyecto</span>
+                </div>
+                <p class="logo-subtitle">Descripcion</p>
+            </div>
+
+            <!-- Form Container -->
+            <div class="form-container">
+                {% block container %}
+                <!-- Contenido del formulario aquí -->
+                {% endblock %}
+            </div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div class="decorative-dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function toggleSettings() {
+            const existingPanel = document.querySelector('.settings-panel');
+            if (existingPanel) { existingPanel.remove(); return; }
+
+            const panel = document.createElement('div');
+            panel.className = 'settings-panel';
+            panel.innerHTML = `
+                <div class="settings-content">
+                    <h3>Configuraciones</h3>
+                    <div class="setting-item">
+                        <label>Modo Oscuro</label>
+                        <div class="toggle-switch" onclick="toggleDarkMode()">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>Reducir Animaciones</label>
+                        <div class="toggle-switch" onclick="toggleAnimations()">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <button class="close-settings" onclick="this.parentElement.parentElement.remove()">Cerrar</button>
+                </div>
+            `;
+            document.body.appendChild(panel);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        function toggleAnimations() {
+            document.body.classList.toggle('reduced-motion');
+            localStorage.setItem('reducedMotion', document.body.classList.contains('reduced-motion'));
+        }
+
+        // Toggle de password con Font Awesome
+        function togglePassword() {
+            const passwordInputs = document.querySelectorAll('input[type="password"], input[data-visible="true"]');
+            passwordInputs.forEach(input => {
+                const wrapper = input.closest('.enhanced-input-wrapper') || input.parentElement;
+                const toggle = wrapper?.querySelector('.password-toggle');
+                if (!toggle) return;
+
+                const revealing = input.type === 'password';
+                input.type = revealing ? 'text' : 'password';
+                input.setAttribute('data-visible', revealing ? 'true' : 'false');
+                toggle.innerHTML = revealing
+                    ? '<i class="fa-solid fa-eye-slash"></i>'
+                    : '<i class="fa-regular fa-eye"></i>';
+                toggle.style.color = revealing ? '#8aa0b2' : '#a0aec0';
+            });
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', function () {
+            if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+            if (localStorage.getItem('reducedMotion') === 'true') document.body.classList.add('reduced-motion');
+
+            processFormElements();
+            addFormInteractions();
+        });
+
+        function processFormElements() {
+            const formGroups = document.querySelectorAll('.p-2, .form-group');
+
+            formGroups.forEach(group => {
+                const input = group.querySelector('input, select, textarea');
+                const label = group.querySelector('label');
+
+                if (input && !group.querySelector('.enhanced-input-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'enhanced-input-wrapper';
+
+                    const inputType = input.type || 'text';
+                    const inputName = input.name;
+                    const placeholder = input.getAttribute('placeholder') || label?.textContent || inputName;
+
+                    if (!label) {
+                        const newLabel = document.createElement('label');
+                        newLabel.className = 'floating-label';
+                        newLabel.textContent = placeholder;
+                        newLabel.setAttribute('for', input.id || inputName);
+                        group.insertBefore(newLabel, input);
+                    } else {
+                        label.className = 'floating-label';
+                    }
+
+                    const icon = document.createElement('div');
+                    icon.className = 'input-icon';
+                    icon.innerHTML = getInputIcon(inputType, inputName);
+
+                    const underline = document.createElement('div');
+                    underline.className = 'input-underline';
+
+                    input.className = 'form-control enhanced-input';
+
+                    if (inputType === 'password') {
+                        const toggle = document.createElement('div');
+                        toggle.className = 'password-toggle';
+                        toggle.innerHTML = '<i class="fa-regular fa-eye"></i>';
+                        toggle.onclick = togglePassword;
+                        wrapper.appendChild(toggle);
+                    }
+
+                    input.parentNode.insertBefore(wrapper, input);
+                    wrapper.appendChild(input);
+                    wrapper.appendChild(icon);
+                    wrapper.appendChild(underline);
+                }
+            });
+        }
+
+        // Devolvemos markup de Font Awesome según tipo/nombre del input
+        function getInputIcon(type, name) {
+            if (name && name.toLowerCase().includes('username')) return '<i class="fa-solid fa-user"></i>';
+            if (type === 'email') return '<i class="fa-regular fa-envelope"></i>';
+            if (type === 'password') return '<i class="fa-solid fa-lock"></i>';
+            if (type === 'tel') return '<i class="fa-solid fa-phone"></i>';
+            return '<i class="fa-solid fa-circle-user"></i>';
+        }
+
+        function addFormInteractions() {
+            document.querySelectorAll('.enhanced-input').forEach(input => {
+                input.addEventListener('focus', function () {
+                    this.closest('.enhanced-input-wrapper')?.classList.add('focused');
+                });
+                input.addEventListener('blur', function () {
+                    const wrapper = this.closest('.enhanced-input-wrapper');
+                    if (!wrapper) return;
+                    wrapper.classList.remove('focused');
+                    wrapper.classList.toggle('filled', !!this.value);
+                });
+                input.addEventListener('input', function () {
+                    const wrapper = this.closest('.enhanced-input-wrapper');
+                    validateInput(this, wrapper);
+                });
+            });
+
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    if (!this.disabled) createRippleEffect(e, this);
+                });
+            });
+        }
+
+        function validateInput(input, wrapper) {
+            let isValid = true;
+            if (input.type === 'email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                isValid = !input.value || emailRegex.test(input.value);
+            }
+            if (input.type === 'password') {
+                const strength = checkPasswordStrength(input.value);
+                updatePasswordStrength(wrapper, strength);
+            }
+            if (wrapper) {
+                wrapper.classList.toggle('invalid', !isValid && input.value);
+                wrapper.classList.toggle('valid', isValid && input.value);
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            return strength;
+        }
+
+        function updatePasswordStrength(wrapper, strength) {
+            const underline = wrapper?.querySelector('.input-underline');
+            if (!underline) return;
+            const colors = ['#f56565', '#ed8936', '#ecc94b', '#48bb78'];
+            const widths = ['25%', '50%', '75%', '100%'];
+            if (strength > 0) {
+                underline.style.background = colors[strength - 1];
+                underline.style.width = widths[strength - 1];
+            }
+        }
+
+        function createRippleEffect(event, element) {
+            const ripple = document.createElement('div');
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            ripple.style.cssText = `
+                position: absolute; border-radius: 50%;
+                background: rgba(255,255,255,0.3); transform: scale(0);
+                animation: ripple-effect 0.6s linear;
+                left:${x}px; top:${y}px; width:${size}px; height:${size}px;
+                pointer-events: none;`;
+            element.style.position = 'relative';
+            element.style.overflow = 'hidden';
+            element.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        // Keyframes del ripple
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple-effect {
+                to { transform: scale(2); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  {% block head_content %}{% endblock %}
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Raloy" />
+  <meta name="author" content="Raloy" />
+  <link rel="icon" type="image/png" href="{% static 'img/icon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <!-- ================== ESTILOS BASE ================== -->
+  {% if request.user.profile.theme == 'default' %}
+    <link href="{% static 'assets/css/default/app.min.css' %}" rel="stylesheet" />
+  {% elif request.user.profile.theme == 'apple' %}
+    <link href="{% static 'assets/css/apple/app.min.css' %}" rel="stylesheet" />
+  {% elif request.user.profile.theme == 'transparent' %}
+    <link href="{% static 'assets/css/transparent/app.min.css' %}" rel="stylesheet" />
+  {% elif request.user.profile.theme == 'facebook' %}
+    <link href="{% static 'assets/css/facebook/app.min.css' %}" rel="stylesheet" />
+  {% elif request.user.profile.theme == 'google' %}
+    <link href="{% static 'assets/css/google/app.min.css' %}" rel="stylesheet" />
+  {% elif request.user.profile.theme == 'material' %}
+    <link href="{% static 'assets/css/material/app.min.css' %}" rel="stylesheet" />
+  {% else %}
+    <link href="{% static 'assets/css/default/app.min.css' %}" rel="stylesheet" />
+  {% endif %}
+
+  <!-- Fuente Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- SweetAlert2 11.22.0 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.0/dist/sweetalert2.min.css">
+
+  <!-- Select2 4.1.0-rc.0 -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+  <!-- Awesomplete 1.1.7 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.7/awesomplete.min.css" />
+
+  <!-- Driver.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.css" />
+
+  <!-- ================== ESTILOS DATATABLES ================== -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css" />
+</head>
+
+<body>
+  <div class="page-cover"></div>
+  <div id="page-loader" class="fade show">
+    <span class="spinner"></span>
+  </div>
+
+  <div id="page-container" class="fade page-sidebar-fixed page-header-fixed">
+    {% include 'navbar.html' %}
+    {% include 'sidebar.html' %}
+
+    <!-- begin #content -->
+		<div id="content" class="content">
+			<!-- begin page-header -->
+			<h1 class="page-header">{% block panel_page %}{% endblock %}</h1>
+			<!-- end page-header -->
+			<!-- begin panel -->
+			<div class="panel panel-inverse">
+				<div class="panel-heading">
+					<h4 class="panel-title">{% block panel_title %}{% endblock %}</h4>
+					<div class="panel-heading-btn">
+						<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+						<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-redo"></i></a>
+						<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
+						<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
+					</div>
+				</div>
+				<div class="panel-body">
+					{% block content %} {% endblock %}
+				</div>
+			</div>
+			<!-- end panel -->
+		</div>
+		<!-- end #content -->
+
+    <a href="javascript:;" class="btn btn-icon btn-circle btn-success btn-scroll-to-top fade"
+       data-click="scroll-top">
+      <i class="fa fa-angle-up"></i>
+    </a>
+  </div>
+
+  <!-- ================== SCRIPTS BASE ================== -->
+
+  <!-- jQuery 3.7.1 -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- App JS -->
+  <script src="{% static 'assets/js/app.min.js' %}"></script>
+
+  {% if request.user.profile.theme == 'default' %}
+    <script src="{% static 'assets/js/theme/default.min.js' %}"></script>
+  {% elif request.user.profile.theme == 'apple' %}
+    <script src="{% static 'assets/js/theme/apple.min.js' %}"></script>
+  {% elif request.user.profile.theme == 'transparent' %}
+    <script src="{% static 'assets/js/theme/transparent.min.js' %}"></script>
+  {% endif %}
+
+  <!-- Bootstrap Datepicker -->
+  <script src="{% static 'assets/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.js' %}"></script>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.0/dist/sweetalert2.min.js"></script>
+
+  <!-- Select2 -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <!-- Awesomplete -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.7/awesomplete.min.js"></script>
+
+  <!-- Driver.js -->
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.js.iife.js"></script>
+
+  <!-- Interact.js -->
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
+  <!-- ================== SCRIPTS DATATABLES ================== -->
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
