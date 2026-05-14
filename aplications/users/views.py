@@ -1,5 +1,7 @@
+import base64
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from aplications.users.forms import SignupForm, ProfileForm
@@ -172,6 +174,28 @@ def user_panel(request):
             except Exception as e:
                 return JsonResponse({"success": False, "message": f"Error al eliminar usuario: {str(e)}"})
 
+        elif action == "signature" and user_id:
+            try:
+                user = get_object_or_404(User, pk=user_id)
+                profile = user.profile
+                data = request.POST.get("signature_data", "")
+                prefix = "data:image/png;base64,"
+                if not data.startswith(prefix):
+                    return JsonResponse({"success": False, "message": "Formato de firma inválido."})
+                img_bytes = base64.b64decode(data[len(prefix):])
+                # Borrar archivo previo antes de guardar el nuevo
+                if profile.signature:
+                    profile.signature.delete(save=False)
+                filename = f"signature_{user.id}.png"
+                profile.signature.save(filename, ContentFile(img_bytes), save=True)
+                return JsonResponse({
+                    "success": True,
+                    "message": "Firma guardada correctamente.",
+                    "url": profile.signature.url,
+                })
+            except Exception as e:
+                return JsonResponse({"success": False, "message": f"Error al guardar firma: {str(e)}"})
+
     users = User.objects.select_related(
         "profile", "profile__position", "profile__area", "profile__boss"
     ).all()
@@ -264,7 +288,26 @@ def panel_areas(request):
 
 @login_required
 def panel_main(request):
-    return render(request, 'panel_main.html', {'response': 'PONG (200)'})
+    from aplications.mesures.models import (
+        EvaluationPeriod, PerformanceEvaluation, KPIDefinition
+    )
+    profile = getattr(request.user, 'profile', None)
+    level = getattr(profile, 'level', 0) or 0
+    is_manager = level in {2, 3, 5}
+
+    if is_manager:
+        ctx = {
+            'is_manager': True,
+            'count_evaluations': PerformanceEvaluation.objects.count(),
+            'count_kpis': KPIDefinition.objects.filter(active=True).count(),
+            'count_periods': EvaluationPeriod.objects.filter(locked=False).count(),
+        }
+    else:
+        ctx = {
+            'is_manager': False,
+            'count_my_evaluations': PerformanceEvaluation.objects.filter(employee=request.user).count(),
+        }
+    return render(request, 'panel_main.html', ctx)
 
 
 def block_user(request):

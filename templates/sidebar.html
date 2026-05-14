@@ -55,12 +55,32 @@
                     </div>
 
                     <div class="col-md-12 p-4">
-                        {% if request.user.profile.level == 0 %}<i class="fas fa-ban"></i> Status 0
-                        {% elif request.user.profile.level == 1 %}<i class="fa-solid fa-user-plus"></i> Status 1
-                        {% elif request.user.profile.level == 2 %}<i class="fa-solid fa-user-tie"></i> Status 2
-                        {% elif request.user.profile.level == 3 %}<i class="fa-solid fa-user-secret"></i> Status 3
-                        {% else %} User {% endif %}
+                        {% if request.user.profile.level == 0 %}<i class="fas fa-ban"></i> Bloqueado
+                        {% elif request.user.profile.level == 1 %}<i class="fa-solid fa-user"></i> Usuario
+                        {% elif request.user.profile.level == 2 %}<i class="fa-solid fa-user-tie"></i> Administrador
+                        {% elif request.user.profile.level == 3 %}<i class="fa-solid fa-user-secret"></i> Admin (sistema)
+                        {% elif request.user.profile.level == 4 %}<i class="fa-solid fa-users-gear"></i> Jefe / Líder
+                        {% elif request.user.profile.level == 5 %}<i class="fa-solid fa-id-badge"></i> RH
+                        {% else %} Otro {% endif %}
                     </div>
+
+                    {% if request.user.profile.position %}
+                    <div class="col-md-12 p-4">
+                        <i class="fa-solid fa-briefcase"></i>&nbsp;{{ request.user.profile.position.name_position }}
+                    </div>
+                    {% endif %}
+
+                    {% if request.user.profile.area %}
+                    <div class="col-md-12 p-4">
+                        <i class="fa-solid fa-sitemap"></i>&nbsp;{{ request.user.profile.area.name_area }}
+                    </div>
+                    {% endif %}
+
+                    {% if request.user.profile.payroll_number %}
+                    <div class="col-md-12 p-4">
+                        <i class="fa-solid fa-hashtag"></i>&nbsp;Nómina {{ request.user.profile.payroll_number }}
+                    </div>
+                    {% endif %}
 
                     <div class="col-md-12 p-4">
                         <i class="fas fa-palette"></i>&nbsp;{{ request.user.profile.theme }} Theme
@@ -89,8 +109,9 @@
                     <span>Home</span>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="{% url 'users:panel_main' %}"><i class="fa-solid fa-star"></i> Principal</a></li>
+                    <li><a href="{% url 'users:panel_main' %}"><i class="fa-solid fa-star" style="color:#ffd35a"></i> Principal</a></li>
                     <li><a href="{% url 'mesures:desempeno_main' %}"><i class="fa-solid fa-chart-line" style="color:#10b981;"></i> Desempeño</a></li>
+                    <li class="logic_manager"><a href="{% url 'mesures:dashboard' %}"><i class="fa-solid fa-chart-pie" style="color:#0a6ebd;"></i> Dashboard</a></li>
                     <li class="logic_manager"><a href="{% url 'mesures:panel_kpis' %}"><i class="fa-solid fa-bullseye" style="color:#f59e0b;"></i> KPIs</a></li>
                     <li class="logic_manager"><a href="{% url 'mesures:panel_periods' %}"><i class="fa-solid fa-calendar-alt" style="color:#a78bfa;"></i> Periodos</a></li>
                 </ul>
@@ -105,7 +126,7 @@
                     <span>Usuarios</span>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="{% url 'users:panel_user' %}"><i class="fa-regular fa-address-card" style="color: #75a8ff;"></i> Panel Admin</a></li>
+                    <li><a href="{% url 'users:panel_user' %}"><i class="fa-regular fa-address-card" style="color:rgb(109, 162, 255);"></i> Panel Admin</a></li>
                     <li><a href="{% url 'users:panel_positions' %}"><i class="fa-solid fa-id-badge" style="color: #ffd35a;"></i> Puestos</a></li>
                     <li><a href="{% url 'users:panel_areas' %}"><i class="fa-solid fa-sitemap" style="color: #ff8a65;"></i> Áreas</a></li>
                 </ul>

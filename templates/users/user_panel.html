@@ -103,6 +103,13 @@
                   <button class="btn btn-sm btn-danger btn-delete" data-id="{{ user.id }}">
                       <i class="fas fa-trash-alt"></i>
                   </button>
+                  <button class="btn btn-sm btn-success btn-signature"
+                          data-id="{{ user.id }}"
+                          data-name="{{ user.get_full_name|default:user.username }}"
+                          data-signature_url="{% if p.signature %}{{ p.signature.url }}{% endif %}"
+                          title="Firma">
+                      <i class="fas fa-signature"></i>
+                  </button>
               </td>
           </tr>
           {% endwith %}
@@ -377,9 +384,48 @@
   </div>
 </div>
 
+<!-- Modal Firma -->
+<div class="modal fade user-modal" id="modal-signature" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-signature"></i> Firma de <span id="sig-user-name">…</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted" style="font-size:.85rem;">
+          Dibuja la firma con el mouse o pantalla táctil. Se guardará como PNG; si ya había una, se reemplazará.
+        </p>
+        <div style="border:2px dashed #cbd5e1; border-radius:8px; background:#fff;">
+          <canvas id="signature-canvas" style="width:100%; height:220px; display:block; touch-action:none; cursor:crosshair;"></canvas>
+        </div>
+        <div id="sig-current-wrap" style="margin-top:.8rem; display:none;">
+          <small class="text-muted">Firma actual:</small><br>
+          <img id="sig-current-img" alt="Firma actual"
+               style="max-width:100%; max-height:120px; border:1px solid #e2e8f0; padding:.3rem; border-radius:6px; background:#fff;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-warning" id="btn-sig-clear">
+            <i class="fas fa-eraser mr-1"></i> Limpiar
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-sig-save">
+            <i class="fas fa-save mr-1"></i> Guardar firma
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <script>
 $(function () {
 
@@ -512,6 +558,80 @@ $(function () {
             error: function () {
                 Swal.fire("❌ Error", "Error inesperado en el servidor", "error");
             }
+        });
+    });
+
+    // ---------- Modal FIRMA ----------
+    const $modalSig = $('#modal-signature');
+    const sigCanvas = document.getElementById('signature-canvas');
+    let signaturePad = null;
+    let currentSigUserId = null;
+
+    function resizeSignatureCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        sigCanvas.width = sigCanvas.offsetWidth * ratio;
+        sigCanvas.height = sigCanvas.offsetHeight * ratio;
+        sigCanvas.getContext('2d').scale(ratio, ratio);
+        if (signaturePad) signaturePad.clear();
+    }
+
+    $('.btn-signature').on('click', function () {
+        const $b = $(this);
+        currentSigUserId = $b.data('id');
+        $('#sig-user-name').text($b.data('name') || '');
+        const url = $b.data('signature_url');
+        if (url) {
+            $('#sig-current-wrap').show();
+            $('#sig-current-img').attr('src', url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now());
+        } else {
+            $('#sig-current-wrap').hide();
+        }
+        $modalSig.modal('show');
+    });
+
+    $modalSig.on('shown.bs.modal', function () {
+        if (!signaturePad) {
+            signaturePad = new SignaturePad(sigCanvas, {
+                backgroundColor: 'rgba(255,255,255,0)',
+                penColor: 'rgb(15, 23, 42)',
+                minWidth: 0.8,
+                maxWidth: 2.2,
+            });
+        }
+        resizeSignatureCanvas();
+    });
+
+    $(window).on('resize', function () {
+        if ($modalSig.hasClass('show')) resizeSignatureCanvas();
+    });
+
+    $('#btn-sig-clear').on('click', function () {
+        if (signaturePad) signaturePad.clear();
+    });
+
+    $('#btn-sig-save').on('click', function () {
+        if (!signaturePad || signaturePad.isEmpty()) {
+            Swal.fire('⚠️', 'Dibuja la firma antes de guardar.', 'warning');
+            return;
+        }
+        const data = signaturePad.toDataURL('image/png');
+        $.ajax({
+            url: "{% url 'users:panel_user' %}",
+            method: 'POST',
+            data: {
+                action: 'signature',
+                user_id: currentSigUserId,
+                signature_data: data,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function (d) {
+                if (d.success) {
+                    Swal.fire('✅ Firma guardada', d.message, 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('❌ Error', d.message, 'error');
+                }
+            },
+            error: function () { Swal.fire('❌ Error', 'Error inesperado en el servidor.', 'error'); }
         });
     });
 

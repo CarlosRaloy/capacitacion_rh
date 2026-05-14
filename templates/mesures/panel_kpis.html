@@ -5,289 +5,7 @@
     <title>Catálogo de KPIs</title>
     <link rel="stylesheet" href="{% static 'css/mesures/desempeno.css' %}">
     <link rel="stylesheet" href="{% static 'css/users/pane_user.css' %}">
-    <style>
-        /* ============================================================
-           VARIABLES: chips/badges con mini-form inline
-           ============================================================ */
-        .vars-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .45rem;
-            padding: .6rem;
-            background: #f1f5f9;
-            border: 1.5px dashed #cbd5e1;
-            border-radius: 10px;
-            min-height: 56px;
-            margin-bottom: .65rem;
-            align-items: center;
-        }
-        .vars-chips:empty::before {
-            content: "Aún no hay variables. Agrega una abajo ↓";
-            color: #94a3b8;
-            font-style: italic;
-            font-size: .85rem;
-            width: 100%;
-            text-align: center;
-        }
-        .var-chip {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: #fff;
-            padding: .4rem .55rem .4rem .85rem;
-            border-radius: 999px;
-            gap: .55rem;
-            font-size: .85rem;
-            box-shadow: 0 3px 8px rgba(59, 130, 246, .25);
-            cursor: grab;
-            transition: transform .12s, box-shadow .12s;
-        }
-        .var-chip:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 14px rgba(59, 130, 246, .4);
-        }
-        .var-chip:active { cursor: grabbing; }
-        .var-chip.dragging { opacity: .4; transform: scale(.95); }
-        .var-chip .var-name {
-            font-family: Menlo, Consolas, monospace;
-            font-weight: 600;
-            pointer-events: none;
-        }
-        .var-chip .var-label {
-            opacity: .85;
-            font-size: .78rem;
-            padding-left: .35rem;
-            border-left: 1px solid rgba(255,255,255,.35);
-            pointer-events: none;
-        }
-        .var-chip .chip-remove {
-            background: rgba(255,255,255,.25);
-            border: none;
-            color: #fff;
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: .75rem;
-            transition: all .12s;
-        }
-        .var-chip .chip-remove:hover { background: #ef4444; }
-
-        /* Chip reservado (`ideal`) — arrastrable, mismo tamaño */
-        .reserved-chip {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
-            color: #fff;
-            padding: .35rem .85rem;
-            border-radius: 999px;
-            font-family: Menlo, Consolas, monospace;
-            font-weight: 600;
-            font-size: .82rem;
-            cursor: grab;
-            box-shadow: 0 3px 8px rgba(168, 85, 247, .25);
-            transition: transform .12s, box-shadow .12s;
-            user-select: none;
-        }
-        .reserved-chip:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(168,85,247,.4); }
-        .reserved-chip:active { cursor: grabbing; }
-        .reserved-chip.dragging { opacity: .4; transform: scale(.95); }
-
-        /* Mini-form para agregar variable */
-        .var-add-row {
-            display: grid;
-            grid-template-columns: 1fr 1.4fr auto;
-            gap: .5rem;
-            align-items: center;
-        }
-        .var-add-row input { padding: .45rem .7rem; font-size: .88rem; }
-        .var-add-row input.var-name-input { font-family: Menlo, Consolas, monospace; }
-        .var-add-row .btn-add-var {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #fff;
-            border: none;
-            padding: .5rem 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            box-shadow: 0 3px 8px rgba(16, 185, 129, .25);
-            display: inline-flex; align-items: center; gap: .35rem;
-        }
-        .var-add-row .btn-add-var:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
-
-        /* ============================================================
-           FÓRMULA: display + calculadora
-           ============================================================ */
-        .formula-display {
-            background: #0f172a;
-            color: #f8fafc;
-            font-family: 'JetBrains Mono', Menlo, Consolas, monospace;
-            font-size: 1.1rem;
-            padding: 1rem 1.1rem;
-            border-radius: 10px;
-            border: 2px dashed #1e293b;
-            min-height: 80px;
-            margin-bottom: .8rem;
-            line-height: 1.5;
-            word-break: break-all;
-            position: relative;
-            transition: border-color .15s, box-shadow .15s, background .15s;
-        }
-        .formula-display:focus-within {
-            border-style: solid;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,.18);
-        }
-        .formula-display.drag-over {
-            border-style: solid;
-            border-color: #10b981;
-            background: #0a1f1a;
-            box-shadow: 0 0 0 4px rgba(16,185,129,.25);
-        }
-        .formula-display.drag-over::after {
-            content: "Suelta para insertar";
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #10b981;
-            font-size: .9rem;
-            font-weight: 600;
-            pointer-events: none;
-            opacity: .9;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-        }
-        .formula-display textarea {
-            background: transparent;
-            color: inherit;
-            border: none;
-            outline: none;
-            width: 100%;
-            resize: none;
-            font: inherit;
-            min-height: 50px;
-        }
-        .formula-display textarea::placeholder { color: #64748b; }
-
-        /* Teclado solo de operadores */
-        .calc-keyboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: .5rem;
-            max-width: 380px;
-        }
-        .calc-key {
-            background: #fff;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            padding: .9rem .5rem;
-            font-family: Menlo, Consolas, monospace;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1e293b;
-            cursor: pointer;
-            transition: all .12s ease;
-            box-shadow: 0 2px 4px rgba(15, 30, 60, .04);
-            min-height: 56px;
-            display: flex; align-items: center; justify-content: center;
-            user-select: none;
-        }
-        .calc-key:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 12px rgba(15, 30, 60, .12);
-            background: #f8fafc;
-        }
-        .calc-key:active { transform: translateY(0); }
-        .calc-key.op {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            color: #fff;
-            border-color: transparent;
-            box-shadow: 0 3px 8px rgba(245, 158, 11, .3);
-            font-size: 1.2rem;
-        }
-        .calc-key.op:hover {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        .calc-key.paren {
-            background: #eef2ff;
-            color: #4338ca;
-            border-color: #c7d2fe;
-        }
-        .calc-key.paren:hover { background: #c7d2fe; }
-        .calc-key.fn {
-            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-            color: #fff;
-            border-color: transparent;
-            font-size: .82rem;
-            text-transform: uppercase;
-        }
-        .calc-key.fn:hover {
-            background: linear-gradient(135deg, #475569 0%, #334155 100%);
-        }
-        .calc-key.danger {
-            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-            color: #fff;
-            border-color: transparent;
-        }
-        .calc-key.danger:hover {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-
-        .formula-actions {
-            display: flex; gap: .5rem; margin-top: .8rem; flex-wrap: wrap;
-            align-items: center;
-        }
-        .formula-result {
-            margin-top: .6rem;
-            padding: .55rem .9rem;
-            border-radius: 8px;
-            font-size: .88rem;
-            display: none;
-            font-weight: 500;
-        }
-        .formula-result.ok  { background: #d1fae5; color: #065f46; display: flex; align-items: center; gap: .4rem; }
-        .formula-result.bad { background: #fee2e2; color: #991b1b; display: flex; align-items: center; gap: .4rem; }
-
-        /* Listado: chip-list de variables compactas */
-        .formula-display-row {
-            font-family: Menlo, Consolas, monospace;
-            background: #f1f5f9;
-            padding: .25rem .5rem;
-            border-radius: 4px;
-            font-size: .85rem;
-        }
-        .var-list-mini { display: flex; flex-wrap: wrap; gap: .25rem; }
-        .var-list-mini .v {
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 1px 7px;
-            border-radius: 999px;
-            font-size: .72rem;
-            font-family: Menlo, Consolas, monospace;
-        }
-
-        /* Select2 — opción "Crear: ..." (tags: true) */
-        .select2-results__option .new-tag {
-            display: inline-flex; align-items: center; gap: .45rem;
-            color: #047857;
-            font-weight: 500;
-        }
-        .select2-results__option .new-tag .ico {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #fff; font-size: .7rem;
-        }
-        .select2-results__option .new-tag b {
-            color: #064e3b;
-        }
-        .select2-container--default .select2-results__option--highlighted[aria-selected] .new-tag,
-        .select2-container--default .select2-results__option--highlighted[aria-selected] .new-tag b {
-            color: #fff;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static "css/mesures/panel_kpis.css" %}">
 {% endblock %}
 
 {% block panel_page %}
@@ -322,7 +40,9 @@
               <th>Categoría</th>
               <th>Variables</th>
               <th>Fórmula</th>
-              <th>% Ideal</th>
+              <th>Tipo</th>
+              <th>Valor ideal</th>
+              <th>Asignado a</th>
               <th>Activo</th>
               <th class="text-center">Acciones</th>
           </tr>
@@ -335,12 +55,22 @@
               <td>
                   <div class="var-list-mini">
                       {% for v in kpi.variables.all %}
-                          <span class="v" title="{{ v.label }}">{{ v.name }}</span>
+                          <span class="v">{{ v.name }}</span>
                       {% endfor %}
                   </div>
               </td>
               <td><span class="formula-display-row">{{ kpi.formula }}</span></td>
-              <td>{{ kpi.ideal_percent }}%</td>
+              <td>{{ kpi.get_result_format_display }}</td>
+              <td>{{ kpi.ideal_display }}</td>
+              <td>
+                  {% with assigned_count=kpi.assigned_users.count %}
+                      {% if assigned_count %}
+                          <span class="badge badge-info">{{ assigned_count }} empleado{{ assigned_count|pluralize:"s" }}</span>
+                      {% else %}
+                          <span class="badge badge-warning" title="Sin empleados asignados, no aparece en evaluaciones">Sin asignar</span>
+                      {% endif %}
+                  {% endwith %}
+              </td>
               <td>
                   {% if kpi.active %}<span class="badge badge-success">Sí</span>
                   {% else %}<span class="badge badge-secondary">No</span>{% endif %}
@@ -352,8 +82,10 @@
                           data-category="{{ kpi.category.name|default_if_none:'' }}"
                           data-formula="{{ kpi.formula }}"
                           data-ideal_percent="{{ kpi.ideal_percent }}"
+                          data-result_format="{{ kpi.result_format }}"
                           data-active="{{ kpi.active|yesno:'1,0' }}"
-                          data-variables='[{% for v in kpi.variables.all %}{"name":"{{ v.name }}","label":"{{ v.label|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                          data-variables='[{% for v in kpi.variables.all %}"{{ v.name|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]'
+                          data-assigned_users='[{% for u in kpi.assigned_users.all %}{{ u.id }}{% if not forloop.last %},{% endif %}{% endfor %}]'>
                       <i class="fas fa-edit"></i>
                   </button>
                   <button class="btn btn-sm btn-danger btn-delete-kpi" data-id="{{ kpi.id }}">
@@ -362,7 +94,7 @@
               </td>
           </tr>
           {% empty %}
-          <tr><td colspan="7" class="text-center text-muted">Sin KPIs registrados.</td></tr>
+          <tr><td colspan="9" class="text-center text-muted">Sin KPIs registrados.</td></tr>
           {% endfor %}
       </tbody>
   </table>
@@ -403,11 +135,27 @@
                     Si no existe, aparecerá <b>Crear: …</b>
                 </small>
               </div>
-              <div class="col-md-6 um-field mb-2">
-                <label>% Ideal <span class="text-danger">*</span></label>
-                <input type="number" step="0.01" min="0" max="100" name="ideal_percent" class="form-control" required placeholder="Ej. 98">
+              <div class="col-md-4 um-field mb-2">
+                <label>Tipo de resultado <span class="text-danger">*</span></label>
+                <select name="result_format" id="result_format" class="form-control" required>
+                    <option value="percent">Porcentaje (%)</option>
+                    <option value="number">Numérico</option>
+                    <option value="currency">Moneda ($)</option>
+                </select>
               </div>
-              <div class="col-md-6 um-field mb-2" style="align-self:end;">
+              <div class="col-md-4 um-field mb-2">
+                <label>Valor ideal <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <div class="input-group-prepend" id="ideal-prefix-wrap" style="display:none;">
+                        <span class="input-group-text" id="ideal-prefix">$</span>
+                    </div>
+                    <input type="number" step="0.01" min="0" name="ideal_percent" class="form-control" required placeholder="Ej. 95">
+                    <div class="input-group-append" id="ideal-suffix-wrap">
+                        <span class="input-group-text" id="ideal-suffix">%</span>
+                    </div>
+                </div>
+              </div>
+              <div class="col-md-4 um-field mb-2" style="align-self:end;">
                 <div class="custom-control custom-switch mt-2">
                     <input type="checkbox" class="custom-control-input" name="active" id="active-switch" checked value="1">
                     <label class="custom-control-label" for="active-switch">Activo</label>
@@ -416,11 +164,26 @@
             </div>
           </section>
 
+          <!-- Empleados asignados -->
+          <section class="um-section">
+            <div class="um-section-header"><i class="fas fa-users"></i><h6>Empleados asignados</h6></div>
+            <p class="text-muted" style="font-size:.82rem; margin-bottom:.5rem;">
+                Selecciona a quién se le evaluará este KPI. Si no asignas a ningún empleado, el KPI <b>no aparecerá</b> en ninguna evaluación.
+            </p>
+            <select name="assigned_users[]" id="assigned-users" class="form-control select2-users" multiple>
+                {% for u in users %}
+                    <option value="{{ u.id }}">
+                        {{ u.get_full_name|default:u.username }}{% if u.profile.area %} — {{ u.profile.area.name_area }}{% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+          </section>
+
           <!-- Variables como chips -->
           <section class="um-section">
             <div class="um-section-header"><i class="fas fa-cube"></i><h6>Variables</h6></div>
             <p class="text-muted" style="font-size:.82rem; margin-bottom:.6rem;">
-                Cada variable se capturará por mes. <b>Arrastra los chips</b> al recuadro de la fórmula (o haz click para insertar).<br>
+                Cada variable se capturará por mes. <b>Arrastra los chips</b> al recuadro de la fórmula o haz click en ellos para insertarlos.<br>
                 Reservada disponible: <span class="reserved-chip" draggable="true" data-insert="ideal" style="font-size:.75rem; padding:.18rem .6rem; vertical-align:middle;">ideal</span>
             </p>
 
@@ -431,8 +194,6 @@
             <div class="var-add-row">
                 <input type="text" id="new-var-name" class="form-control var-name-input"
                        placeholder="nombre (ej. obtenido)" maxlength="40">
-                <input type="text" id="new-var-label" class="form-control"
-                       placeholder="Etiqueta (ej. Resultado Obtenido)" maxlength="120">
                 <button type="button" class="btn-add-var" id="btn-add-var">
                     <i class="fas fa-plus"></i> Agregar
                 </button>
@@ -462,7 +223,6 @@
                 <button type="button" class="calc-key op" data-insert="*">×</button>
 
                 <button type="button" class="calc-key op" data-insert="/">÷</button>
-                <button type="button" class="calc-key op" data-insert="%">%</button>
                 <button type="button" class="calc-key danger" data-action="clear">AC</button>
             </div>
 
@@ -556,12 +316,18 @@ $(function () {
     // ------------------------------------------------------------
     //  Slugify
     // ------------------------------------------------------------
-    function slugify(s) {
+    function slugifyLive(s) {
+        // Para usar mientras el usuario escribe: conserva el "_" final
+        // (si lo recortamos, "piezas " + "totales" quedaría como "piezastotales").
         return (s || '').toString()
             .toLowerCase()
             .normalize('NFD').replace(/[̀-ͯ]/g, '')
             .replace(/[^a-z0-9_]+/g, '_')
-            .replace(/^_+|_+$/g, '');
+            .replace(/^_+/, '');
+    }
+
+    function slugify(s) {
+        return slugifyLive(s).replace(/_+$/, '');
     }
 
     function escapeHtml(s) {
@@ -575,28 +341,26 @@ $(function () {
     // ------------------------------------------------------------
     function renderChips() {
         $varsChips.empty();
-        variables.forEach((v, idx) => {
+        variables.forEach((name, idx) => {
             const chip = $(`
-                <div class="var-chip" data-idx="${idx}" data-insert="${escapeHtml(v.name)}" draggable="true" title="Arrastra o clic para insertar en la fórmula">
-                    <span class="var-name">${escapeHtml(v.name)}</span>
-                    <span class="var-label">${escapeHtml(v.label)}</span>
+                <div class="var-chip" data-idx="${idx}" data-insert="${escapeHtml(name)}" draggable="true" title="Arrastra o clic para insertar en la fórmula">
+                    <span class="var-name">${escapeHtml(name)}</span>
                     <button type="button" class="chip-remove" title="Quitar"><i class="fas fa-times"></i></button>
-                    <input type="hidden" name="var_name[]" value="${escapeHtml(v.name)}">
-                    <input type="hidden" name="var_label[]" value="${escapeHtml(v.label)}">
+                    <input type="hidden" name="var_name[]" value="${escapeHtml(name)}">
                 </div>
             `);
             $varsChips.append(chip);
         });
     }
 
-    function addVariable(rawName, rawLabel) {
+    function addVariable(rawName) {
         const name = slugify(rawName);
         if (!name) { Swal.fire('⚠️', 'Escribe un nombre para la variable.', 'warning'); return false; }
         if (name === 'ideal') { Swal.fire('⚠️', '"ideal" es un nombre reservado.', 'warning'); return false; }
-        if (variables.some(v => v.name === name)) { Swal.fire('⚠️', `Ya existe la variable "${name}".`, 'warning'); return false; }
-        variables.push({ name, label: (rawLabel || '').trim() || name });
+        if (variables.includes(name)) { Swal.fire('⚠️', `Ya existe la variable "${name}".`, 'warning'); return false; }
+        variables.push(name);
         renderChips();
-        return true;
+        return name;
     }
 
     function clearVariables() {
@@ -605,15 +369,15 @@ $(function () {
     }
 
     $('#btn-add-var').on('click', function () {
-        const $n = $('#new-var-name'); const $l = $('#new-var-label');
-        if (addVariable($n.val(), $l.val())) {
-            $n.val(''); $l.val(''); $n.focus();
+        const $n = $('#new-var-name');
+        if (addVariable($n.val())) {
+            $n.val('').focus();
         }
     });
-    $('#new-var-name, #new-var-label').on('keydown', function (e) {
+    $('#new-var-name').on('keydown', function (e) {
         if (e.key === 'Enter') { e.preventDefault(); $('#btn-add-var').click(); }
     });
-    $('#new-var-name').on('input', function () { $(this).val(slugify($(this).val())); });
+    $('#new-var-name').on('input', function () { $(this).val(slugifyLive($(this).val())); });
 
     $varsChips.on('click', '.chip-remove', function () {
         const idx = parseInt($(this).closest('.var-chip').data('idx'));
@@ -709,6 +473,25 @@ $(function () {
         insertAtCursor(value);
     });
 
+    // ------------------------------------------------------------
+    //  Prefijo/sufijo del campo "Valor ideal" según el tipo
+    // ------------------------------------------------------------
+    function applyFormatHints(format) {
+        const $prefix = $('#ideal-prefix-wrap');
+        const $suffix = $('#ideal-suffix-wrap');
+        if (format === 'currency') {
+            $prefix.show(); $('#ideal-prefix').text('$');
+            $suffix.hide();
+        } else if (format === 'percent') {
+            $prefix.hide();
+            $suffix.show(); $('#ideal-suffix').text('%');
+        } else {
+            $prefix.hide();
+            $suffix.hide();
+        }
+    }
+    $('#result_format').on('change', function () { applyFormatHints(this.value); });
+
     $('#btn-validate-formula').on('click', function () {
         const formData = new FormData($form[0]);
         formData.set('action', 'validate_formula');
@@ -734,10 +517,13 @@ $(function () {
         $form.find('input[name="action"]').val('create');
         $form.find('input[name="obj_id"]').val('');
         $form.find('input[name="active"]').prop('checked', true);
+        $('#result_format').val('percent');
+        applyFormatHints('percent');
         $('#kpi-modal-title').text('Nuevo KPI');
         clearVariables();
         clearFormula();
         $modal.data('pending-category', '');
+        $modal.data('pending-users', []);
         $modal.modal('show');
     });
 
@@ -748,22 +534,44 @@ $(function () {
         $form.find('input[name="name"]').val($b.data('name'));
         $form.find('input[name="ideal_percent"]').val($b.data('ideal_percent'));
         $form.find('input[name="active"]').prop('checked', String($b.data('active')) === '1');
+        const fmt = $b.data('result_format') || 'percent';
+        $('#result_format').val(fmt);
+        applyFormatHints(fmt);
         $formula.val($b.data('formula') || '');
 
-        variables = ($b.data('variables') || []).map(v => ({ name: v.name, label: v.label }));
+        variables = ($b.data('variables') || []).slice();
         renderChips();
         $('#formula-result').hide();
         $('#kpi-modal-title').text('Editar KPI');
         $modal.data('pending-category', $b.data('category') || '');
+        $modal.data('pending-users', $b.data('assigned_users') || []);
         $modal.modal('show');
     });
+
+    function initSelect2Users() {
+        const $sel = $modal.find('.select2-users');
+        if ($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+        $sel.select2({
+            dropdownParent: $modal,
+            width: '100%',
+            placeholder: 'Elige empleados (vacío = todos)…',
+            allowClear: true,
+            closeOnSelect: false,
+        });
+    }
 
     // Inicializar Select2 y aplicar valor pendiente cuando el modal aparece
     $modal.on('shown.bs.modal', function () {
         initSelect2Tags();
+        initSelect2Users();
         const pending = $modal.data('pending-category');
         setSelect2Value($modal.find('select[name="category_name"]'), pending);
         $modal.data('pending-category', '');
+
+        const pendingUsers = $modal.data('pending-users') || [];
+        const $users = $modal.find('select[name="assigned_users[]"]');
+        $users.val(pendingUsers.map(String)).trigger('change');
+        $modal.data('pending-users', []);
     });
 
     // ------------------------------------------------------------

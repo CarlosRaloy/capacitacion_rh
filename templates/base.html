@@ -9,6 +9,7 @@
   <meta name="author" content="Raloy" />
   <link rel="icon" type="image/png" href="{% static 'img/icon.png' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/macos.css' %}">
 
   <!-- ================== ESTILOS BASE ================== -->
   {% if request.user.profile.theme == 'default' %}
@@ -65,7 +66,7 @@
 			<h1 class="page-header">{% block panel_page %}{% endblock %}</h1>
 			<!-- end page-header -->
 			<!-- begin panel -->
-			<div class="panel panel-inverse">
+			<div class="panel">
 				<div class="panel-heading">
 					<h4 class="panel-title">{% block panel_title %}{% endblock %}</h4>
 					<div class="panel-heading-btn">

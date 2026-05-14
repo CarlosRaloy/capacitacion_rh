@@ -20,7 +20,7 @@
     <div>
         <h2>{% if evaluation %}Editar evaluación{% else %}Nueva evaluación{% endif %}</h2>
         <div style="font-size:.85rem; opacity:.85; margin-top:.25rem;">
-            Captura los valores de cada variable por mes — los porcentajes se calculan al instante.
+            Captura los valores de cada variable por mes — los resultados se calculan al instante.
         </div>
     </div>
     <span class="frh10-code">F-RH-10 Rev. 01</span>
@@ -78,7 +78,9 @@
     {% for kpi in kpis %}
         <div class="um-section kpi-card" data-kpi="{{ kpi.id }}"
              data-formula="{{ kpi.formula }}"
-             data-ideal="{{ kpi.ideal_percent }}">
+             data-ideal="{{ kpi.ideal_percent }}"
+             data-format="{{ kpi.result_format }}"
+             data-users='[{% for u in kpi.assigned_users.all %}{{ u.id }}{% if not forloop.last %},{% endif %}{% endfor %}]'>
             <div class="um-section-header" style="justify-content:space-between; align-items:flex-start;">
                 <div>
                     <i class="fas fa-bullseye"></i>
@@ -88,7 +90,7 @@
                     </div>
                 </div>
                 <div style="text-align:right;">
-                    <span class="badge badge-info">% Ideal: {{ kpi.ideal_percent }}%</span>
+                    <span class="badge badge-info">Ideal: {{ kpi.ideal_display }}</span>
                 </div>
             </div>
 
@@ -105,8 +107,7 @@
                     {% for v in kpi.variables.all %}
                     <tr>
                         <td class="kpi-cell">
-                            <div class="kpi-name">{{ v.label }}</div>
-                            <div class="kpi-formula">var: <code>{{ v.name }}</code></div>
+                            <div class="kpi-name"><code>{{ v.name }}</code></div>
                         </td>
                         <td>
                             <input type="number" step="0.0001"
@@ -125,13 +126,16 @@
                 </tbody>
                 <tfoot>
                     <tr style="background:#f8fafc;">
-                        <td style="text-align:right; font-weight:600;">% calculado</td>
+                        <td style="text-align:right; font-weight:600;">Resultado</td>
                         <td class="calc-cell"><span class="pct-m1">—</span></td>
                         <td class="calc-cell"><span class="pct-m2">—</span></td>
                     </tr>
                     <tr class="bimester-cell">
-                        <td colspan="2" style="text-align:right;">% Bimestre</td>
-                        <td><span class="pct-bim">—</span></td>
+                        <td colspan="2" style="text-align:right;">Bimestre</td>
+                        <td>
+                            <span class="pct-bim">—</span>
+                            <span class="vs-ideal" style="margin-left:.6rem; font-size:.78rem; font-weight:600;"></span>
+                        </td>
                     </tr>
                 </tfoot>
             </table>
@@ -143,9 +147,17 @@
         </div>
     {% endfor %}
 
+    <div id="no-employee-msg" class="alert alert-light" style="display:none;">
+        Selecciona un trabajador para ver sus KPIs asignados.
+    </div>
+    <div id="no-kpis-msg" class="alert alert-info" style="display:none;">
+        Este empleado no tiene KPIs asignados. Asígnale al menos uno desde
+        <a href="{% url 'mesures:panel_kpis' %}">Catálogo de KPIs</a>.
+    </div>
+
     <div class="eval-submit-bar">
         <div class="overall">
-            Promedio actual: <b id="overall-pct-bar">0.00%</b>
+            Promedio actual: <b id="overall-pct-bar">0.00</b>
         </div>
         <div>
             <a href="{% url 'mesures:desempeno_main' %}" class="btn btn-light">Cancelar</a>
@@ -203,9 +215,12 @@ $(function () {
         } catch { return NaN; }
     }
 
-    function fmt(n) {
+    function fmt(n, format) {
         if (!isFinite(n) || isNaN(n)) return '—';
-        return n.toFixed(2) + '%';
+        const body = n.toFixed(2);
+        if (format === 'currency') return '$' + body;
+        if (format === 'number') return body;
+        return body + '%';
     }
 
     function readCtxFor($card, month) {
@@ -219,28 +234,55 @@ $(function () {
 
     function recalcCard($card) {
         const formula = $card.data('formula') || '';
+        const format = $card.data('format') || 'percent';
+        const ideal = parseFloat($card.data('ideal'));
         const p1 = evalFormula(formula, readCtxFor($card, 1));
         const p2 = evalFormula(formula, readCtxFor($card, 2));
-        $card.find('.pct-m1').text(fmt(p1));
-        $card.find('.pct-m2').text(fmt(p2));
+        $card.find('.pct-m1').text(fmt(p1, format));
+        $card.find('.pct-m2').text(fmt(p2, format));
 
         let pbim;
         if (!isFinite(p1) && !isFinite(p2)) pbim = NaN;
         else if (!isFinite(p1)) pbim = p2;
         else if (!isFinite(p2)) pbim = p1;
         else pbim = (p1 + p2) / 2;
-        $card.find('.pct-bim').text(fmt(pbim));
+        $card.find('.pct-bim').text(fmt(pbim, format));
+
+        const $vs = $card.find('.vs-ideal');
+        if (isFinite(pbim) && isFinite(ideal)) {
+            if (pbim >= ideal) {
+                $vs.text('✓ Cumple objetivo').css('color', '#059669');
+            } else {
+                $vs.text('▼ Por debajo del objetivo').css('color', '#dc2626');
+            }
+        } else {
+            $vs.text('').css('color', '');
+        }
         return isFinite(pbim) ? pbim : null;
     }
 
     function recalcAll() {
         let acc = 0, n = 0;
-        $('.kpi-card').each(function () {
+        $('.kpi-card:visible').each(function () {
             const v = recalcCard($(this));
             if (v !== null) { acc += v; n++; }
         });
         const overall = n ? (acc / n) : 0;
-        $('#overall-pct-bar').text(overall.toFixed(2) + '%');
+        $('#overall-pct-bar').text(overall.toFixed(2));
+    }
+
+    function filterKpisByEmployee(employeeId) {
+        const eid = parseInt(employeeId);
+        let visible = 0;
+        $('.kpi-card').each(function () {
+            const $c = $(this);
+            const users = $c.data('users') || [];
+            const matches = isFinite(eid) && users.indexOf(eid) !== -1;
+            $c.toggle(matches);
+            if (matches) visible++;
+        });
+        $('#no-employee-msg').toggle(!eid);
+        $('#no-kpis-msg').toggle(!!eid && visible === 0);
     }
 
     function applyMonthLabels(periodId) {
@@ -260,6 +302,11 @@ $(function () {
         });
     });
     if (DATA.current_period) applyMonthLabels(DATA.current_period);
+
+    // Filtro inicial por empleado (modo edición o selección previa)
+    const initialEmployee = $('select[name="employee"]').val()
+        || '{{ evaluation.employee_id|default:"" }}';
+    filterKpisByEmployee(initialEmployee);
     recalcAll();
 
     // ----- Eventos -----
@@ -269,6 +316,10 @@ $(function () {
     });
     $('select[name="period"]').on('change', function () {
         applyMonthLabels($(this).val());
+    });
+    $('select[name="employee"]').on('change', function () {
+        filterKpisByEmployee(this.value);
+        recalcAll();
     });
 
     $('#form-eval').on('submit', function (e) {

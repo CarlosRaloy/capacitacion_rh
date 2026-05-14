@@ -3,13 +3,15 @@ from functools import wraps
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Exists, OuterRef, Q
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from aplications.users.models import AreasUserModel, PositionUserModel
 from .models import (
     KPICategory, KPIDefinition, KPIVariable, KPIVariableValue,
     EvaluationPeriod, PerformanceEvaluation, KPIMeasurement,
@@ -122,10 +124,20 @@ def evaluation_detail(request, pk):
     if not is_manager(request.user) and evaluation.employee_id != request.user.id:
         return HttpResponseForbidden("No puedes ver esta evaluación.")
 
-    measurements = list(evaluation.measurements.all())
+    measurements = list(
+        evaluation.measurements
+        .filter(kpi__assigned_users=evaluation.employee)
+        .select_related('kpi')
+    )
+    values = [m.percent_bimester for m in measurements if m.percent_bimester is not None]
+    overall = (
+        (sum(values) / len(values)).quantize(Decimal('0.01'))
+        if values else Decimal('0')
+    )
     return render(request, 'mesures/evaluation_detail.html', {
         'evaluation': evaluation,
         'measurements': measurements,
+        'overall': overall,
         'can_manage': is_manager(request.user),
     })
 
@@ -213,7 +225,7 @@ def evaluation_form(request, pk=None):
             return JsonResponse({'success': False, 'message': f'Error al guardar: {e}'})
 
     # GET
-    kpis = KPIDefinition.objects.filter(active=True).prefetch_related('variables')
+    kpis = KPIDefinition.objects.filter(active=True).prefetch_related('variables', 'assigned_users')
     measurements_map = {}
     if evaluation:
         for m in evaluation.measurements.prefetch_related('variable_values__variable'):
@@ -266,43 +278,37 @@ def _validate_formula(formula: str, var_names: set):
         raise ValueError(f"La fórmula usa variables no declaradas: {', '.join(sorted(unknown))}")
 
 
-def _save_kpi_variables(kpi, payload_variables):
+def _save_kpi_variables(kpi, variable_names):
     """
-    payload_variables: lista de dicts [{'name': 'obtenido', 'label': '...', 'order': 1}, ...]
+    variable_names: lista de strings (slugs) ['obtenido', 'esperado', ...].
     Reemplaza el conjunto completo de variables del KPI.
     """
-    incoming_names = {v['name'] for v in payload_variables}
+    incoming = set(variable_names)
     # No permitir borrar variables usadas por mediciones (rompería el cálculo histórico)
     locked_var_ids = set(KPIVariableValue.objects.filter(
         variable__kpi=kpi
-    ).exclude(variable__name__in=incoming_names).values_list('variable_id', flat=True))
+    ).exclude(variable__name__in=incoming).values_list('variable_id', flat=True))
     if locked_var_ids:
         locked_names = list(KPIVariable.objects.filter(id__in=locked_var_ids).values_list('name', flat=True))
         raise ValueError(f"No puedes eliminar variables con mediciones registradas: {', '.join(locked_names)}")
 
-    existing = {v.name: v for v in kpi.variables.all()}
-    for data in payload_variables:
-        v = existing.get(data['name'])
-        if v:
-            v.label = data['label']
-            v.save()
-        else:
-            KPIVariable.objects.create(kpi=kpi, name=data['name'], label=data['label'])
+    existing = {v.name for v in kpi.variables.all()}
+    for name in variable_names:
+        if name not in existing:
+            KPIVariable.objects.create(kpi=kpi, name=name)
     # eliminar las que ya no vienen
-    kpi.variables.exclude(name__in=incoming_names).delete()
+    kpi.variables.exclude(name__in=incoming).delete()
 
 
 def _parse_variables_from_post(request) -> list:
     """
-    Acepta arrays `var_name[]`, `var_label[]`.
-    Salta filas vacías. Slugifica el name. Valida unicidad y la palabra reservada `ideal`.
+    Acepta el array `var_name[]`. Salta filas vacías, slugifica, valida unicidad
+    y la palabra reservada `ideal`. Devuelve lista de slugs.
     """
     from django.utils.text import slugify
-    names = request.POST.getlist('var_name[]')
-    labels = request.POST.getlist('var_label[]')
     out = []
     seen = set()
-    for i, raw_name in enumerate(names):
+    for raw_name in request.POST.getlist('var_name[]'):
         slug = slugify(raw_name).replace('-', '_')
         if not slug:
             continue
@@ -311,8 +317,7 @@ def _parse_variables_from_post(request) -> list:
         if slug in seen:
             raise ValueError(f"Variable duplicada: '{slug}'")
         seen.add(slug)
-        label = (labels[i] if i < len(labels) else '').strip() or slug
-        out.append({'name': slug, 'label': label})
+        out.append(slug)
     if not out:
         raise ValueError('Debe declarar al menos una variable.')
     return out
@@ -327,29 +332,40 @@ def panel_kpis(request):
         if action in ('create', 'edit'):
             try:
                 variables = _parse_variables_from_post(request)
-                var_names = {v['name'] for v in variables}
+                var_names = set(variables)
                 formula = (request.POST.get('formula') or '').strip()
                 _validate_formula(formula, var_names)
 
                 category = _resolve_category(request.POST.get('category_name'))
-                if action == 'create':
-                    kpi = KPIDefinition.objects.create(
-                        name=request.POST['name'].strip(),
-                        category=category,
-                        formula=formula,
-                        ideal_percent=_to_decimal(request.POST.get('ideal_percent')),
-                        active=request.POST.get('active') in ('1', 'on', 'true', 'True'),
-                    )
-                else:
-                    kpi = get_object_or_404(KPIDefinition, pk=obj_id)
-                    kpi.name = request.POST['name'].strip()
-                    kpi.category = category
-                    kpi.formula = formula
-                    kpi.ideal_percent = _to_decimal(request.POST.get('ideal_percent'))
-                    kpi.active = request.POST.get('active') in ('1', 'on', 'true', 'True')
-                    kpi.save()
+                valid_formats = {c for c, _ in KPIDefinition.FORMAT_CHOICES}
+                result_format = request.POST.get('result_format')
+                if result_format not in valid_formats:
+                    result_format = KPIDefinition.FORMAT_PERCENT
+                assigned_ids = [
+                    int(x) for x in request.POST.getlist('assigned_users[]') if str(x).isdigit()
+                ]
+                with transaction.atomic():
+                    if action == 'create':
+                        kpi = KPIDefinition.objects.create(
+                            name=request.POST['name'].strip(),
+                            category=category,
+                            formula=formula,
+                            ideal_percent=_to_decimal(request.POST.get('ideal_percent')),
+                            result_format=result_format,
+                            active=request.POST.get('active') in ('1', 'on', 'true', 'True'),
+                        )
+                    else:
+                        kpi = get_object_or_404(KPIDefinition, pk=obj_id)
+                        kpi.name = request.POST['name'].strip()
+                        kpi.category = category
+                        kpi.formula = formula
+                        kpi.ideal_percent = _to_decimal(request.POST.get('ideal_percent'))
+                        kpi.result_format = result_format
+                        kpi.active = request.POST.get('active') in ('1', 'on', 'true', 'True')
+                        kpi.save()
 
-                _save_kpi_variables(kpi, variables)
+                    _save_kpi_variables(kpi, variables)
+                    kpi.assigned_users.set(User.objects.filter(id__in=assigned_ids))
                 msg = 'KPI creado.' if action == 'create' else 'KPI actualizado.'
                 return JsonResponse({'success': True, 'message': msg})
             except ValueError as e:
@@ -373,14 +389,21 @@ def panel_kpis(request):
             # Endpoint AJAX para probar la fórmula en vivo
             try:
                 variables = _parse_variables_from_post(request)
-                _validate_formula((request.POST.get('formula') or '').strip(), {v['name'] for v in variables})
+                _validate_formula((request.POST.get('formula') or '').strip(), set(variables))
                 return JsonResponse({'success': True, 'message': '✓ Fórmula válida.'})
             except ValueError as e:
                 return JsonResponse({'success': False, 'message': str(e)})
 
-    kpis = KPIDefinition.objects.prefetch_related('variables').select_related('category').all()
+    kpis = KPIDefinition.objects.prefetch_related('variables', 'assigned_users').select_related('category').all()
     categories = KPICategory.objects.all()
-    return render(request, 'mesures/panel_kpis.html', {'kpis': kpis, 'categories': categories})
+    users = User.objects.select_related('profile', 'profile__area').filter(
+        profile__level__gt=0
+    ).order_by('first_name', 'last_name')
+    return render(request, 'mesures/panel_kpis.html', {
+        'kpis': kpis,
+        'categories': categories,
+        'users': users,
+    })
 
 
 # ============================================================
@@ -427,3 +450,169 @@ def panel_periods(request):
 
     periods = EvaluationPeriod.objects.all()
     return render(request, 'mesures/panel_periods.html', {'periods': periods})
+
+
+# ============================================================
+#  Dashboard ejecutivo
+# ============================================================
+@manager_required
+def dashboard(request):
+    area_id = _to_int_or_none(request.GET.get('area'))
+    position_id = _to_int_or_none(request.GET.get('position'))
+    employee_id = _to_int_or_none(request.GET.get('employee'))
+    period_id = _to_int_or_none(request.GET.get('period'))
+
+    qs = KPIMeasurement.objects.select_related(
+        'kpi',
+        'evaluation', 'evaluation__period',
+        'evaluation__employee', 'evaluation__employee__profile',
+        'evaluation__employee__profile__area',
+        'evaluation__employee__profile__position',
+    )
+
+    if area_id:
+        qs = qs.filter(evaluation__employee__profile__area_id=area_id)
+    if position_id:
+        qs = qs.filter(evaluation__employee__profile__position_id=position_id)
+    if employee_id:
+        qs = qs.filter(evaluation__employee_id=employee_id)
+    if period_id:
+        qs = qs.filter(evaluation__period_id=period_id)
+
+    # Solo mediciones de KPIs actualmente asignados al empleado evaluado
+    AssignedThrough = KPIDefinition.assigned_users.through
+    qs = qs.annotate(
+        _is_assigned=Exists(
+            AssignedThrough.objects.filter(
+                kpidefinition_id=OuterRef('kpi_id'),
+                user_id=OuterRef('evaluation__employee_id'),
+            )
+        )
+    ).filter(_is_assigned=True)
+
+    measurements = list(qs)
+
+    # --- Métricas resumen ---
+    eval_ids = {m.evaluation_id for m in measurements}
+    employee_ids = {m.evaluation.employee_id for m in measurements}
+
+    valued = [m for m in measurements if m.percent_bimester is not None]
+    avg_result = (
+        float(sum(m.percent_bimester for m in valued)) / len(valued)
+        if valued else 0
+    )
+    cumple = sum(
+        1 for m in valued
+        if m.percent_bimester >= Decimal(m.ideal_percent_snapshot)
+    )
+    no_cumple = len(valued) - cumple
+    cumplimiento_pct = (cumple / len(valued) * 100) if valued else 0
+
+    # --- Por KPI ---
+    by_kpi = {}
+    for m in valued:
+        slot = by_kpi.setdefault(m.kpi_id, {'name': m.kpi.name, 'values': []})
+        slot['values'].append(float(m.percent_bimester))
+    kpi_avg = sorted(
+        [
+            {'name': v['name'], 'avg': round(sum(v['values']) / len(v['values']), 2)}
+            for v in by_kpi.values() if v['values']
+        ],
+        key=lambda x: -x['avg'],
+    )
+    kpi_top = kpi_avg[:5]
+    kpi_bottom = sorted(kpi_avg, key=lambda x: x['avg'])[:5]
+
+    # --- Por área ---
+    by_area = {}
+    for m in valued:
+        area = m.evaluation.employee.profile.area
+        key = area.name_area if area else 'Sin área'
+        by_area.setdefault(key, []).append(float(m.percent_bimester))
+    area_avg = sorted(
+        [{'name': k, 'avg': round(sum(v) / len(v), 2)} for k, v in by_area.items()],
+        key=lambda x: -x['avg'],
+    )
+
+    # --- Por puesto ---
+    by_position = {}
+    for m in valued:
+        pos = m.evaluation.employee.profile.position
+        key = pos.name_position if pos else 'Sin puesto'
+        by_position.setdefault(key, []).append(float(m.percent_bimester))
+    position_avg = sorted(
+        [{'name': k, 'avg': round(sum(v) / len(v), 2)} for k, v in by_position.items()],
+        key=lambda x: -x['avg'],
+    )
+
+    # --- Evolución por periodo ---
+    by_period = {}
+    for m in valued:
+        p = m.evaluation.period
+        key = (p.year, p.bimester)
+        slot = by_period.setdefault(key, {'label': str(p), 'values': []})
+        slot['values'].append(float(m.percent_bimester))
+    period_evolution = [
+        {'label': v['label'], 'avg': round(sum(v['values']) / len(v['values']), 2)}
+        for _, v in sorted(by_period.items(), key=lambda x: x[0])
+    ]
+
+    # --- Ranking empleados (top 10) ---
+    by_emp = {}
+    for m in valued:
+        emp = m.evaluation.employee
+        slot = by_emp.setdefault(emp.id, {
+            'name': emp.get_full_name() or emp.username,
+            'area': emp.profile.area.name_area if emp.profile and emp.profile.area else '—',
+            'position': emp.profile.position.name_position if emp.profile and emp.profile.position else '—',
+            'values': [],
+            'cumple': 0,
+            'total': 0,
+        })
+        slot['values'].append(float(m.percent_bimester))
+        slot['total'] += 1
+        if m.percent_bimester >= Decimal(m.ideal_percent_snapshot):
+            slot['cumple'] += 1
+    emp_ranking = sorted(
+        [
+            {
+                'name': v['name'], 'area': v['area'], 'position': v['position'],
+                'avg': round(sum(v['values']) / len(v['values']), 2),
+                'cumplimiento': round(v['cumple'] / v['total'] * 100, 1) if v['total'] else 0,
+                'count': v['total'],
+            }
+            for v in by_emp.values() if v['values']
+        ],
+        key=lambda x: -x['avg'],
+    )[:10]
+
+    metrics = {
+        'total_evaluations': len(eval_ids),
+        'total_employees': len(employee_ids),
+        'total_measurements': len(measurements),
+        'avg_result': round(avg_result, 2),
+        'cumplimiento_pct': round(cumplimiento_pct, 1),
+        'cumple': cumple,
+        'no_cumple': no_cumple,
+    }
+
+    context = {
+        'areas': AreasUserModel.objects.all().order_by('name_area'),
+        'positions': PositionUserModel.objects.all().order_by('name_position'),
+        'employees': User.objects.select_related('profile').filter(
+            profile__level__gt=0
+        ).order_by('first_name', 'last_name'),
+        'periods': EvaluationPeriod.objects.all(),
+        'filters': {
+            'area': area_id, 'position': position_id,
+            'employee': employee_id, 'period': period_id,
+        },
+        'metrics': metrics,
+        'kpi_top': kpi_top,
+        'kpi_bottom': kpi_bottom,
+        'area_avg': area_avg,
+        'position_avg': position_avg,
+        'period_evolution': period_evolution,
+        'emp_ranking': emp_ranking,
+    }
+    return render(request, 'mesures/dashboard.html', context)

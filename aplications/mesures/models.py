@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -23,12 +23,22 @@ class KPIDefinition(models.Model):
     Catálogo editable de indicadores con fórmula libre.
 
     El admin define:
-      - N variables (KPIVariable) con `name` (usable en la fórmula) y `label`.
+      - N variables (KPIVariable) con `name` (usable en la fórmula).
       - Una `formula` en sintaxis aritmética. La variable reservada `ideal`
         siempre está disponible y representa `ideal_percent`.
+      - El `result_format` controla cómo se muestra el resultado (%, $, plano).
 
     Ejemplo: variables = [obtenido, esperado]; formula = "obtenido / esperado * ideal".
     """
+
+    FORMAT_PERCENT = 'percent'
+    FORMAT_NUMBER = 'number'
+    FORMAT_CURRENCY = 'currency'
+    FORMAT_CHOICES = (
+        (FORMAT_PERCENT, 'Porcentaje'),
+        (FORMAT_NUMBER, 'Numérico'),
+        (FORMAT_CURRENCY, 'Moneda'),
+    )
 
     name = models.CharField(max_length=120)
     category = models.ForeignKey(
@@ -39,8 +49,16 @@ class KPIDefinition(models.Model):
         help_text='Expresión aritmética. Variables disponibles: las definidas + `ideal`.'
     )
     ideal_percent = models.DecimalField(
-        max_digits=5, decimal_places=2,
-        help_text='% ideal del KPI (también accesible en la fórmula como `ideal`).'
+        max_digits=14, decimal_places=2,
+        help_text='Valor ideal/objetivo del KPI (también accesible en la fórmula como `ideal`).'
+    )
+    result_format = models.CharField(
+        max_length=10, choices=FORMAT_CHOICES, default=FORMAT_PERCENT,
+        help_text='Cómo se muestra el resultado calculado y el valor ideal.'
+    )
+    assigned_users = models.ManyToManyField(
+        User, blank=True, related_name='assigned_kpis',
+        help_text='Empleados a los que se les evaluará este KPI. Vacío = aplica a todos.'
     )
     active = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -52,6 +70,28 @@ class KPIDefinition(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def unit_prefix(self) -> str:
+        return '$' if self.result_format == self.FORMAT_CURRENCY else ''
+
+    @property
+    def unit_suffix(self) -> str:
+        return '%' if self.result_format == self.FORMAT_PERCENT else ''
+
+    def display(self, value) -> str:
+        """Formatea un valor numérico con el prefijo/sufijo del KPI."""
+        if value is None:
+            return '—'
+        try:
+            d = Decimal(value)
+        except (InvalidOperation, TypeError, ValueError):
+            return '—'
+        return f"{self.unit_prefix}{d:.2f}{self.unit_suffix}"
+
+    @property
+    def ideal_display(self) -> str:
+        return self.display(self.ideal_percent)
+
 
 class KPIVariable(models.Model):
     """Variable que se captura por mes en cada evaluación."""
@@ -60,7 +100,6 @@ class KPIVariable(models.Model):
         max_length=40,
         help_text='Identificador usado en la fórmula (sin espacios, ej. "obtenido").'
     )
-    label = models.CharField(max_length=120, help_text='Etiqueta visible (ej. "Resultado Obtenido").')
 
     class Meta:
         unique_together = ('kpi', 'name')
@@ -148,7 +187,7 @@ class KPIMeasurement(models.Model):
     )
     kpi = models.ForeignKey(KPIDefinition, on_delete=models.PROTECT)
     formula_snapshot = models.CharField(max_length=500)
-    ideal_percent_snapshot = models.DecimalField(max_digits=5, decimal_places=2)
+    ideal_percent_snapshot = models.DecimalField(max_digits=14, decimal_places=2)
 
     class Meta:
         unique_together = ('evaluation', 'kpi')
@@ -200,6 +239,16 @@ class KPIMeasurement(models.Model):
         if m2 is None:
             return m1
         return ((m1 + m2) / 2).quantize(Decimal('0.01'))
+
+    @property
+    def comparison_badge(self):
+        """Compara el resultado del bimestre con el ideal. None si no hay dato."""
+        val = self.percent_bimester
+        if val is None:
+            return None
+        if val >= Decimal(self.ideal_percent_snapshot):
+            return {'icon': '✓', 'text': 'Cumple objetivo', 'color': '#059669', 'ok': True}
+        return {'icon': '▼', 'text': 'Por debajo del objetivo', 'color': '#dc2626', 'ok': False}
 
 
 class KPIVariableValue(models.Model):

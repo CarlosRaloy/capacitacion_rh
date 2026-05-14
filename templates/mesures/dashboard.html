@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_content %}
+    <title>Dashboard de Desempeño</title>
+    <link rel="stylesheet" href="{% static 'css/mesures/desempeno.css' %}">
+    <link rel="stylesheet" href="{% static "css/mesures/dashboard.css" %}">
+{% endblock %}
+
+{% block panel_page %}
+    Desempeño <small>Dashboard ejecutivo</small>
+{% endblock %}
+
+{% block panel_title %}
+    Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="dash-banner">
+    <div>
+        <h2><i class="fas fa-chart-pie mr-2"></i>Dashboard de Desempeño</h2>
+        <div style="font-size:.88rem; opacity:.88; margin-top:.25rem;">
+            Vista ejecutiva — combina filtros para analizar áreas, puestos, empleados y periodos.
+        </div>
+    </div>
+    <span class="badge-live"><i class="fas fa-bolt mr-1"></i> En vivo</span>
+</div>
+
+<!-- Filtros -->
+<form method="GET" class="dash-filters">
+    <div class="row">
+        <div class="col-md-3 mb-2">
+            <label>Área</label>
+            <select name="area" class="form-control select2-dash" data-placeholder="— Todas —">
+                <option value=""></option>
+                {% for a in areas %}
+                    <option value="{{ a.id }}" {% if filters.area == a.id %}selected{% endif %}>{{ a.name_area }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Puesto</label>
+            <select name="position" class="form-control select2-dash" data-placeholder="— Todos —">
+                <option value=""></option>
+                {% for p in positions %}
+                    <option value="{{ p.id }}" {% if filters.position == p.id %}selected{% endif %}>{{ p.name_position }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Empleado</label>
+            <select name="employee" class="form-control select2-dash" data-placeholder="— Todos —">
+                <option value=""></option>
+                {% for u in employees %}
+                    <option value="{{ u.id }}" {% if filters.employee == u.id %}selected{% endif %}>
+                        {{ u.get_full_name|default:u.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 mb-2">
+            <label>Periodo</label>
+            <select name="period" class="form-control select2-dash" data-placeholder="— Todos —">
+                <option value=""></option>
+                {% for p in periods %}
+                    <option value="{{ p.id }}" {% if filters.period == p.id %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div style="margin-top:.4rem;">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-filter mr-1"></i> Aplicar filtros</button>
+        <a href="{% url 'mesures:dashboard' %}" class="btn btn-light"><i class="fas fa-eraser mr-1"></i> Limpiar</a>
+    </div>
+</form>
+
+{% if metrics.total_measurements == 0 %}
+    <div class="chart-card">
+        <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <h5>Sin datos para los filtros seleccionados</h5>
+            <p>Ajusta los filtros o registra evaluaciones para ver el análisis.</p>
+        </div>
+    </div>
+{% else %}
+
+<!-- Métricas resumen -->
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="lbl">Evaluaciones</div>
+        <div class="val">{{ metrics.total_evaluations }}</div>
+        <div class="sub">Capturadas con filtros aplicados</div>
+    </div>
+    <div class="metric-card violet">
+        <div class="lbl">Empleados evaluados</div>
+        <div class="val">{{ metrics.total_employees }}</div>
+        <div class="sub">Personal con al menos un resultado</div>
+    </div>
+    <div class="metric-card amber">
+        <div class="lbl">Mediciones de KPI</div>
+        <div class="val">{{ metrics.total_measurements }}</div>
+        <div class="sub">KPIs evaluados en total</div>
+    </div>
+    <div class="metric-card green">
+        <div class="lbl">% Cumplimiento</div>
+        <div class="val">{{ metrics.cumplimiento_pct }}%</div>
+        <div class="sub">{{ metrics.cumple }} cumplen / {{ metrics.no_cumple }} por debajo</div>
+    </div>
+    <div class="metric-card rose">
+        <div class="lbl">Resultado promedio</div>
+        <div class="val">{{ metrics.avg_result }}</div>
+        <div class="sub">Promedio de todos los KPIs filtrados</div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Cumple vs No cumple -->
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <div class="ttl"><i class="fas fa-bullseye"></i> Cumplimiento del objetivo</div>
+            <div class="sub">Mediciones que igualan o superan el ideal del KPI.</div>
+            <canvas id="chart-cumplimiento" height="220"></canvas>
+        </div>
+    </div>
+
+    <!-- Top KPIs -->
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <div class="ttl"><i class="fas fa-medal"></i> Top 5 KPIs</div>
+            <div class="sub">KPIs con el mejor promedio.</div>
+            <canvas id="chart-kpi-top" height="220"></canvas>
+        </div>
+    </div>
+
+    <!-- Bottom KPIs -->
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <div class="ttl"><i class="fas fa-triangle-exclamation"></i> KPIs por debajo</div>
+            <div class="sub">Los 5 con resultado más bajo.</div>
+            <canvas id="chart-kpi-bottom" height="220"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Por área -->
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <div class="ttl"><i class="fas fa-sitemap"></i> Resultado promedio por área</div>
+            <div class="sub">Comparativo entre áreas para los filtros aplicados.</div>
+            <canvas id="chart-by-area" height="260"></canvas>
+        </div>
+    </div>
+
+    <!-- Por puesto -->
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <div class="ttl"><i class="fas fa-id-badge"></i> Resultado promedio por puesto</div>
+            <div class="sub">Comparativo entre puestos.</div>
+            <canvas id="chart-by-position" height="260"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Evolución -->
+<div class="chart-card">
+    <div class="ttl"><i class="fas fa-chart-line"></i> Evolución por periodo</div>
+    <div class="sub">Promedio de resultado a lo largo de los bimestres.</div>
+    <canvas id="chart-evolution" height="110"></canvas>
+</div>
+
+<!-- Ranking empleados -->
+<div class="chart-card">
+    <div class="ttl"><i class="fas fa-trophy"></i> Top 10 — Ranking de empleados</div>
+    <div class="sub">Empleados con mejor promedio en el periodo filtrado.</div>
+    <table class="rank-table">
+        <thead>
+            <tr>
+                <th style="width:60px;">#</th>
+                <th>Empleado</th>
+                <th>Área</th>
+                <th>Puesto</th>
+                <th class="text-right">Promedio</th>
+                <th class="text-right">% Cumplimiento</th>
+                <th class="text-right">KPIs</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in emp_ranking %}
+            <tr>
+                <td><span class="pos">{{ forloop.counter }}</span></td>
+                <td><b>{{ e.name }}</b></td>
+                <td>{{ e.area }}</td>
+                <td>{{ e.position }}</td>
+                <td class="text-right"><b>{{ e.avg }}</b></td>
+                <td class="text-right">
+                    {% if e.cumplimiento >= 80 %}
+                        <span class="pill-good">{{ e.cumplimiento }}%</span>
+                    {% else %}
+                        <span class="pill-warn">{{ e.cumplimiento }}%</span>
+                    {% endif %}
+                </td>
+                <td class="text-right">{{ e.count }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center text-muted" style="padding:1.2rem;">Sin datos para mostrar.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Datos para Chart.js -->
+{{ kpi_top|json_script:"data-kpi-top" }}
+{{ kpi_bottom|json_script:"data-kpi-bottom" }}
+{{ area_avg|json_script:"data-area-avg" }}
+{{ position_avg|json_script:"data-position-avg" }}
+{{ period_evolution|json_script:"data-period-evolution" }}
+{{ metrics|json_script:"data-metrics" }}
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+$(function () {
+    $('.select2-dash').select2({ width: '100%', allowClear: true, placeholder: function() { return $(this).data('placeholder') || ''; } });
+
+    {% if metrics.total_measurements > 0 %}
+    const PALETTE = [
+        '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444',
+        '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#14b8a6',
+    ];
+    const GRADIENTS = {
+        ok: 'rgba(16, 185, 129, 0.85)',
+        bad: 'rgba(239, 68, 68, 0.85)',
+    };
+
+    function parseJson(id) {
+        const el = document.getElementById(id);
+        return el ? JSON.parse(el.textContent) : null;
+    }
+
+    const metrics = parseJson('data-metrics');
+    const kpiTop = parseJson('data-kpi-top') || [];
+    const kpiBottom = parseJson('data-kpi-bottom') || [];
+    const areaAvg = parseJson('data-area-avg') || [];
+    const positionAvg = parseJson('data-position-avg') || [];
+    const periodEvolution = parseJson('data-period-evolution') || [];
+
+    Chart.defaults.font.family = "'Poppins', 'Segoe UI', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#475569';
+
+    // 1. Cumplimiento (doughnut)
+    new Chart(document.getElementById('chart-cumplimiento'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Cumple objetivo', 'Por debajo'],
+            datasets: [{
+                data: [metrics.cumple, metrics.no_cumple],
+                backgroundColor: [GRADIENTS.ok, GRADIENTS.bad],
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+                            const pct = total ? (ctx.parsed / total * 100).toFixed(1) : 0;
+                            return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '65%',
+        }
+    });
+
+    function barChart(canvasId, items, color) {
+        if (!items.length) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            ctx.font = '13px Poppins';
+            ctx.fillStyle = '#94a3b8';
+            ctx.textAlign = 'center';
+            ctx.fillText('Sin datos', 150, 80);
+            return;
+        }
+        new Chart(document.getElementById(canvasId), {
+            type: 'bar',
+            data: {
+                labels: items.map(i => i.name),
+                datasets: [{
+                    label: 'Promedio',
+                    data: items.map(i => i.avg),
+                    backgroundColor: color,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    y: { grid: { display: false } },
+                }
+            }
+        });
+    }
+
+    barChart('chart-kpi-top', kpiTop, '#10b981');
+    barChart('chart-kpi-bottom', kpiBottom, '#ef4444');
+
+    function multiColorBar(canvasId, items) {
+        if (!items.length) return;
+        new Chart(document.getElementById(canvasId), {
+            type: 'bar',
+            data: {
+                labels: items.map(i => i.name),
+                datasets: [{
+                    label: 'Promedio',
+                    data: items.map(i => i.avg),
+                    backgroundColor: items.map((_, idx) => PALETTE[idx % PALETTE.length]),
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } },
+                }
+            }
+        });
+    }
+
+    multiColorBar('chart-by-area', areaAvg);
+    multiColorBar('chart-by-position', positionAvg);
+
+    // Evolución (línea)
+    if (periodEvolution.length) {
+        new Chart(document.getElementById('chart-evolution'), {
+            type: 'line',
+            data: {
+                labels: periodEvolution.map(i => i.label),
+                datasets: [{
+                    label: 'Promedio',
+                    data: periodEvolution.map(i => i.avg),
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                    borderColor: '#3b82f6',
+                    borderWidth: 2.5,
+                    tension: 0.32,
+                    pointBackgroundColor: '#3b82f6',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } },
+                }
+            }
+        });
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

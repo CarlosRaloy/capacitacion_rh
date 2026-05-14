@@ -11,4 +11,5 @@ urlpatterns = [
 
     path('kpis/', views.panel_kpis, name='panel_kpis'),
     path('periods/', views.panel_periods, name='panel_periods'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 ]

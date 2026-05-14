@@ -68,7 +68,7 @@
         </div>
         {% with pct=ev.overall_percent %}
             <div class="eval-score {% if pct >= 80 %}good{% elif pct >= 60 %}warn{% else %}bad{% endif %}">
-                <div class="pct">{{ pct }}%</div>
+                <div class="pct">{{ pct }}</div>
                 <div class="lbl">Promedio</div>
             </div>
         {% endwith %}

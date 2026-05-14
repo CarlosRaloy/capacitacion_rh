@@ -1,0 +1,389 @@
+/* =========================================================
+   macOS Design System — variables + componentes globales
+   Lenguaje de diseño unificado para toda la aplicación.
+   ========================================================= */
+:root {
+    /* Colores macOS */
+    --mac-blue: #0a84ff;
+    --mac-blue-dark: #0066d6;
+    --mac-green: #34c759;
+    --mac-green-strong: #10b981;
+    --mac-red: #ff453a;
+    --mac-red-dark: #d70015;
+    --mac-orange: #ff9f0a;
+    --mac-yellow: #ffcc00;
+    --mac-purple: #af52de;
+    --mac-cyan: #5ac8fa;
+
+    /* Texto */
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #94a3b8;
+
+    /* Superficies */
+    --surface-bg: #f4f6fb;
+    --surface-card: #ffffff;
+    --surface-overlay: rgba(255,255,255,0.92);
+
+    /* Bordes y radios */
+    --border-soft: rgba(0, 0, 0, 0.06);
+    --border-medium: rgba(0, 0, 0, 0.10);
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 16px;
+
+    /* Sombras */
+    --shadow-card: 0 10px 25px rgba(15, 23, 42, 0.05), 0 2px 8px rgba(15, 23, 42, 0.03);
+    --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.12);
+    --shadow-popover: 0 14px 36px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08);
+
+    /* Focus ring */
+    --focus-ring: 0 0 0 3px rgba(10, 132, 255, 0.25);
+}
+
+/* =========================================================
+   Page chrome (header + panel "ventana macOS")
+   Aplica a TODAS las páginas con .panel (no al Launchpad).
+   ========================================================= */
+#content:has(> .panel) {
+    background: var(--surface-bg);
+}
+
+.page-header {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 1.65rem !important;
+    letter-spacing: .2px;
+    border-bottom: none !important;
+    padding: 0 0 .35rem !important;
+    margin: 0 0 1rem !important;
+}
+.page-header small {
+    color: var(--text-secondary) !important;
+    font-size: .9rem !important;
+    font-weight: 400 !important;
+    margin-left: .5rem;
+}
+
+/* Tarjeta panel — ventana macOS */
+.panel.panel-inverse,
+.panel.panel-default,
+.panel {
+    background: var(--surface-card) !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-card) !important;
+    overflow: hidden;
+}
+
+/* Cabecera del panel — barra estilo ventana con traffic lights */
+.panel > .panel-heading {
+    position: relative;
+    background: linear-gradient(180deg, #f8f9fc 0%, #eef1f6 100%) !important;
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07) !important;
+    padding: .85rem 1.1rem .85rem 86px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 42px;
+}
+
+.panel > .panel-heading::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff5f57;
+    box-shadow:
+        0 0 0 .5px rgba(0, 0, 0, 0.08),
+        20px 0 0 0 #febc2e,
+        20px 0 0 .5px rgba(0, 0, 0, 0.08),
+        40px 0 0 0 #28c840,
+        40px 0 0 .5px rgba(0, 0, 0, 0.08);
+}
+
+.panel > .panel-heading .panel-title {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    font-size: .92rem !important;
+    letter-spacing: .15px;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.panel > .panel-heading .panel-heading-btn { display: none !important; }
+.panel > .panel-body { background: transparent !important; padding: 1.2rem !important; }
+
+/* Tablas dentro de paneles */
+.panel .table { background: transparent; }
+.panel .table thead th {
+    background: rgba(0, 0, 0, 0.02) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+@media (max-width: 540px) {
+    .panel > .panel-heading { padding-left: 76px !important; }
+    .panel > .panel-heading::before {
+        left: 14px;
+        width: 11px; height: 11px;
+        box-shadow:
+            0 0 0 .5px rgba(0,0,0,0.08),
+            18px 0 0 0 #febc2e,
+            18px 0 0 .5px rgba(0,0,0,0.08),
+            36px 0 0 0 #28c840,
+            36px 0 0 .5px rgba(0,0,0,0.08);
+    }
+}
+
+/* =========================================================
+   Modales macOS
+   ========================================================= */
+.modal-backdrop { background: rgba(15, 23, 42, 0.45) !important; }
+.modal-backdrop.show { opacity: 1 !important; }
+
+.modal-content {
+    background: var(--surface-card) !important;
+    border: none !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-modal) !important;
+    overflow: hidden;
+}
+.modal-header {
+    background: linear-gradient(180deg, #f8f9fc 0%, #eef1f6 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    padding: .85rem 1.1rem;
+    align-items: center;
+}
+.modal-header .modal-title {
+    color: var(--text-primary);
+    font-size: .98rem;
+    font-weight: 600;
+}
+.modal-header .close {
+    color: var(--text-secondary);
+    text-shadow: none;
+    opacity: .8;
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+.modal-header .close:hover { opacity: 1; color: var(--text-primary); }
+.modal-body { padding: 1.2rem; }
+.modal-footer {
+    background: rgba(0,0,0,0.015);
+    border-top: 1px solid var(--border-soft);
+    padding: .8rem 1.1rem;
+}
+
+.user-modal .modal-header {
+    background: linear-gradient(180deg, #f8f9fc 0%, #eef1f6 100%) !important;
+    color: var(--text-primary) !important;
+}
+.user-modal .modal-header .modal-title { color: var(--text-primary) !important; }
+.user-modal .modal-header .modal-title i { color: var(--mac-blue) !important; }
+.user-modal .modal-header .close { color: var(--text-secondary) !important; opacity: .8; }
+
+/* =========================================================
+   Botones macOS
+   ========================================================= */
+.btn {
+    border-radius: var(--radius-md) !important;
+    font-weight: 500;
+    transition: all .15s ease;
+    box-shadow: none;
+}
+.btn:focus { box-shadow: var(--focus-ring) !important; }
+
+.btn-primary {
+    background: linear-gradient(180deg, var(--mac-blue) 0%, var(--mac-blue-dark) 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow:
+        0 2px 5px rgba(10, 132, 255, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background: linear-gradient(180deg, #1a8fff 0%, #0070e3 100%) !important;
+    box-shadow:
+        0 3px 8px rgba(10, 132, 255, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30) !important;
+}
+
+.btn-light, .btn-default {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+}
+.btn-light:hover, .btn-default:hover {
+    background: #fff !important;
+    border-color: rgba(0, 0, 0, 0.14) !important;
+}
+
+/* Botón de creación (verde, con shine y glow) */
+.btn-success,
+.btn-eval-new,
+button[id^="btn-create"] {
+    background: linear-gradient(135deg, #34d399 0%, var(--mac-green-strong) 55%, #059669 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    padding: .55rem 1.1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: .15px !important;
+    box-shadow:
+        0 8px 20px rgba(16, 185, 129, 0.32),
+        0 2px 6px rgba(16, 185, 129, 0.20),
+        inset 0 1px 0 rgba(255,255,255,0.28) !important;
+    position: relative;
+    overflow: hidden;
+    transition: transform .18s ease, box-shadow .22s ease, background .22s ease !important;
+}
+.btn-success::before,
+.btn-eval-new::before,
+button[id^="btn-create"]::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -120%;
+    width: 80%; height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%);
+    transform: skewX(-22deg);
+    transition: left .65s ease;
+    pointer-events: none;
+}
+.btn-success:hover,
+.btn-eval-new:hover,
+button[id^="btn-create"]:hover {
+    background: linear-gradient(135deg, #4ade80 0%, #14b97c 55%, #047857 100%) !important;
+    transform: translateY(-2px);
+    box-shadow:
+        0 14px 28px rgba(16, 185, 129, 0.40),
+        0 4px 10px rgba(16, 185, 129, 0.26),
+        inset 0 1px 0 rgba(255,255,255,0.32) !important;
+}
+.btn-success:hover::before,
+.btn-eval-new:hover::before,
+button[id^="btn-create"]:hover::before { left: 130%; }
+.btn-success:active,
+.btn-eval-new:active,
+button[id^="btn-create"]:active {
+    transform: translateY(0);
+    box-shadow:
+        0 4px 12px rgba(16, 185, 129, 0.30),
+        inset 0 1px 0 rgba(255,255,255,0.20) !important;
+}
+.btn-success > i,
+.btn-eval-new > i,
+button[id^="btn-create"] > i {
+    margin-right: .35rem;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.18));
+}
+
+.btn-danger {
+    background: linear-gradient(180deg, var(--mac-red) 0%, var(--mac-red-dark) 100%) !important;
+    border: none !important;
+    color: #fff !important;
+}
+.btn-danger:hover {
+    background: linear-gradient(180deg, #ff5a50 0%, #e30418 100%) !important;
+}
+
+.btn-warning {
+    background: linear-gradient(180deg, var(--mac-yellow) 0%, var(--mac-orange) 100%) !important;
+    border: none !important;
+    color: var(--text-primary) !important;
+}
+.btn-warning:hover {
+    background: linear-gradient(180deg, #ffd633 0%, #ffaa1d 100%) !important;
+}
+
+.btn-info {
+    background: linear-gradient(180deg, var(--mac-cyan) 0%, var(--mac-blue) 100%) !important;
+    border: none !important;
+    color: #fff !important;
+}
+.btn-info:hover {
+    background: linear-gradient(180deg, #6ed1fb 0%, #1a8fff 100%) !important;
+}
+
+.btn-secondary {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border: none !important;
+    color: var(--text-primary) !important;
+}
+.btn-secondary:hover { background: rgba(0, 0, 0, 0.10) !important; }
+
+.btn-sm {
+    padding: .28rem .55rem;
+    font-size: .82rem;
+    border-radius: var(--radius-sm) !important;
+}
+
+/* Los btn-sm verdes (acción en tabla) NO heredan el tratamiento "creación".
+   Se quedan compactos como el resto de botones de acción. */
+.btn-sm.btn-success,
+.btn-success.btn-sm {
+    padding: .28rem .55rem !important;
+    font-size: .82rem !important;
+    font-weight: 500 !important;
+    letter-spacing: normal !important;
+    box-shadow:
+        0 1px 3px rgba(16, 185, 129, 0.25),
+        inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    border-radius: var(--radius-sm) !important;
+}
+.btn-sm.btn-success::before,
+.btn-success.btn-sm::before { display: none !important; }
+
+.btn-sm.btn-success:hover,
+.btn-success.btn-sm:hover {
+    transform: none !important;
+    box-shadow:
+        0 2px 6px rgba(16, 185, 129, 0.32),
+        inset 0 1px 0 rgba(255,255,255,0.25) !important;
+}
+.btn-sm.btn-success:active,
+.btn-success.btn-sm:active {
+    transform: translateY(1px) !important;
+    box-shadow:
+        0 1px 2px rgba(16, 185, 129, 0.25),
+        inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+.btn-sm.btn-success > i,
+.btn-success.btn-sm > i {
+    margin-right: .25rem;
+}
+
+/* =========================================================
+   Inputs y badges
+   ========================================================= */
+.form-control {
+    border: 1px solid var(--border-medium) !important;
+    border-radius: 9px !important;
+    background: #fff !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.form-control:focus {
+    border-color: var(--mac-blue) !important;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.18) !important;
+}
+
+.badge {
+    border-radius: 6px !important;
+    font-weight: 500;
+    padding: .35em .55em;
+}
