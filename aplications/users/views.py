@@ -22,9 +22,15 @@ def _home_for(user) -> str:
     # Mapeo nivel -> nombre de url
     if level == 0:       # bloqueado
         url_name = "users:block"
-    elif level == 1:     # Usuario
+    elif level == 1:     # Visitante
         url_name = "users:panel_main"
     elif level == 2:     # Admin
+        url_name = "users:panel_main"
+    elif level == 3:     # Admin (Sistema)
+        url_name = "users:panel_main"
+    elif level == 4:     # Lider
+        url_name = "users:panel_main"
+    elif level == 5:     # RH
         url_name = "users:panel_main"
     else:                # fallback
         url_name = "users:block"
