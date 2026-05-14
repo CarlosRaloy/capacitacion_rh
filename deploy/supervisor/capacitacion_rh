@@ -1,0 +1,8 @@
+[program:capacitacion_rh]
+command=/var/www/html/capacitacion_rh/deploy/gunicorn.sh
+autostart=true
+autorestart=true
+stderr_logfile=/var/www/html/capacitacion_rh/deploy/err.log
+stdout_logfile=/var/www/html/capacitacion_rh/deploy/out.log
+user=odooapps
+environment=LANG=en_US.UTF-8,LC_ALL=en_US.UTF-8
