@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_content %}
+    <title>Desempeño</title>
+    <link rel="stylesheet" href="{% static 'css/mesures/desempeno.css' %}">
+{% endblock %}
+
+{% block panel_page %}
+    Desempeño <small>Evaluaciones bimestrales (F-RH-10)</small>
+{% endblock %}
+
+{% block panel_title %}
+    Evaluaciones
+{% endblock %}
+
+{% block content %}
+
+<div class="frh10-banner">
+    <div>
+        <h2>Evaluación del desempeño</h2>
+        <div style="font-size:.85rem; opacity:.85; margin-top:.25rem;">
+            {% if can_manage %}
+                Gestión de evaluaciones por bimestre
+            {% else %}
+                Mis evaluaciones
+            {% endif %}
+        </div>
+    </div>
+    <span class="frh10-code">F-RH-10 Rev. 01</span>
+</div>
+
+{% if can_manage %}
+<div style="margin-bottom: 1rem;">
+    <a href="{% url 'mesures:evaluation_create' %}" class="btn btn-eval-new">
+        <i class="fas fa-plus"></i> Nueva evaluación
+    </a>
+    <a href="{% url 'mesures:panel_kpis' %}" class="btn btn-light ml-1"><i class="fas fa-bullseye"></i> KPIs</a>
+    <a href="{% url 'mesures:panel_periods' %}" class="btn btn-light"><i class="fas fa-calendar-alt"></i> Periodos</a>
+</div>
+{% endif %}
+
+<div class="filter-pills">
+    <a href="?" class="pill {% if not selected_period %}active{% endif %}">Todos</a>
+    {% for p in periods %}
+        <a href="?period={{ p.id }}" class="pill {% if selected_period == p.id %}active{% endif %}">
+            {{ p.year }} · {{ p.get_bimester_display }}
+            {% if p.locked %}<i class="fas fa-lock ml-1"></i>{% endif %}
+        </a>
+    {% endfor %}
+</div>
+
+{% for ev in evaluations %}
+    <div class="eval-card">
+        <div class="emp-avatar">
+            {% with full=ev.employee.get_full_name|default:ev.employee.username %}
+                {{ full|make_list|first|upper }}
+            {% endwith %}
+        </div>
+        <div class="emp-info">
+            <h5 class="emp-name">{{ ev.employee.get_full_name|default:ev.employee.username }}</h5>
+            <div class="emp-meta">
+                {{ ev.period }}
+                {% if ev.period.locked %}<span class="period-locked-badge ml-1">Bloqueado</span>{% endif %}
+                {% if ev.employee.profile.position %}· {{ ev.employee.profile.position.name_position }}{% endif %}
+                {% if ev.employee.profile.area %}· {{ ev.employee.profile.area.name_area }}{% endif %}
+            </div>
+        </div>
+        {% with pct=ev.overall_percent %}
+            <div class="eval-score {% if pct >= 80 %}good{% elif pct >= 60 %}warn{% else %}bad{% endif %}">
+                <div class="pct">{{ pct }}%</div>
+                <div class="lbl">Promedio</div>
+            </div>
+        {% endwith %}
+        <div class="actions">
+            <a href="{% url 'mesures:evaluation_detail' ev.id %}" class="btn btn-sm btn-info" title="Ver">
+                <i class="fas fa-eye"></i>
+            </a>
+            {% if can_manage %}
+                <a href="{% url 'mesures:evaluation_edit' ev.id %}" class="btn btn-sm btn-primary" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button class="btn btn-sm btn-danger btn-delete-eval" data-id="{{ ev.id }}" title="Eliminar">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            {% endif %}
+        </div>
+    </div>
+{% empty %}
+    <div class="text-center text-muted" style="padding: 2rem;">
+        <i class="fas fa-clipboard-list" style="font-size: 2.5rem; opacity:.3; display:block; margin-bottom:.5rem;"></i>
+        No hay evaluaciones {% if selected_period %}para este periodo{% endif %} todavía.
+    </div>
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function () {
+    $('.btn-delete-eval').on('click', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: '¿Eliminar evaluación?',
+            text: 'Se borrarán también todas sus mediciones.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((r) => {
+            if (!r.isConfirmed) return;
+            $.ajax({
+                url: '/desempeno/evaluation/' + id + '/delete/',
+                method: 'POST',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function (d) {
+                    if (d.success) Swal.fire('✅ Eliminado', d.message, 'success').then(() => location.reload());
+                    else Swal.fire('❌ Error', d.message, 'error');
+                },
+                error: function () { Swal.fire('❌ Error', 'Error inesperado.', 'error'); }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -263,8 +263,8 @@ def panel_areas(request):
 
 
 @login_required
-def ping(request):
-    return render(request, 'blank.html', {'response': 'PONG (200)'})
+def panel_main(request):
+    return render(request, 'panel_main.html', {'response': 'PONG (200)'})
 
 
 def block_user(request):

@@ -46,7 +46,7 @@ urlpatterns = [
 
     path(
         route='',
-        view=views.ping,
+        view=views.panel_main,
         name='panel_main'
     ),
 

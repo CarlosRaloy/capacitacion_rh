@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_content %}
+    <title>Evaluación · {{ evaluation.employee.get_full_name|default:evaluation.employee.username }}</title>
+    <link rel="stylesheet" href="{% static 'css/mesures/desempeno.css' %}">
+    <style>
+        @media print {
+            #sidebar, #header, .frh10-banner .frh10-code, .no-print { display: none !important; }
+            #content { margin-left: 0 !important; padding: 0 !important; }
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: .8rem;
+            margin-bottom: 1.2rem;
+        }
+        .summary-grid .item {
+            background: #fff;
+            border: 1px solid #e9eef5;
+            border-radius: 10px;
+            padding: .7rem 1rem;
+            box-shadow: 0 2px 5px rgba(15, 30, 60, .04);
+        }
+        .summary-grid .lbl {
+            font-size: .72rem; text-transform: uppercase;
+            color: #94a3b8; letter-spacing: .5px;
+            margin-bottom: .15rem;
+        }
+        .summary-grid .val { font-weight: 600; color: #1e293b; }
+        .kpi-detail-card { margin-bottom: 1rem; }
+    </style>
+{% endblock %}
+
+{% block panel_page %}
+    Desempeño <small>Detalle de evaluación</small>
+{% endblock %}
+
+{% block panel_title %}
+    Evaluación
+{% endblock %}
+
+{% block content %}
+
+<div class="frh10-banner">
+    <div>
+        <h2>Evaluación del desempeño</h2>
+        <div style="font-size:.85rem; opacity:.85; margin-top:.25rem;">
+            {{ evaluation.period }}
+            {% if evaluation.period.locked %}<span class="period-locked-badge ml-1">Bloqueado</span>{% endif %}
+        </div>
+    </div>
+    <span class="frh10-code">F-RH-10 Rev. 01</span>
+</div>
+
+<div class="no-print" style="margin-bottom:1rem;">
+    <a href="{% url 'mesures:desempeno_main' %}" class="btn btn-light"><i class="fas fa-arrow-left"></i> Volver</a>
+    {% if can_manage %}
+        <a href="{% url 'mesures:evaluation_edit' evaluation.id %}" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
+    {% endif %}
+    <button class="btn btn-light" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+</div>
+
+<div class="summary-grid">
+    <div class="item">
+        <div class="lbl">Trabajador</div>
+        <div class="val">{{ evaluation.employee.get_full_name|default:evaluation.employee.username }}</div>
+    </div>
+    <div class="item">
+        <div class="lbl">Puesto</div>
+        <div class="val">{{ evaluation.employee.profile.position.name_position|default:"—" }}</div>
+    </div>
+    <div class="item">
+        <div class="lbl">Departamento</div>
+        <div class="val">{{ evaluation.employee.profile.area.name_area|default:"—" }}</div>
+    </div>
+    <div class="item">
+        <div class="lbl">Jefe inmediato</div>
+        <div class="val">
+            {% if evaluation.employee.profile.boss %}
+                {{ evaluation.employee.profile.boss.get_full_name|default:evaluation.employee.profile.boss.username }}
+            {% elif evaluation.employee.profile.boss_name %}
+                {{ evaluation.employee.profile.boss_name }}
+            {% else %}—{% endif %}
+        </div>
+    </div>
+    <div class="item">
+        <div class="lbl">Bimestre</div>
+        <div class="val">{{ evaluation.period }}</div>
+    </div>
+    <div class="item">
+        <div class="lbl">Evaluador</div>
+        <div class="val">{{ evaluation.evaluator.get_full_name|default:evaluation.evaluator.username|default:"—" }}</div>
+    </div>
+    <div class="item">
+        <div class="lbl">Promedio general</div>
+        <div class="val" style="color:#0a6ebd; font-size:1.3rem;">{{ evaluation.overall_percent }}%</div>
+    </div>
+</div>
+
+{% for m in measurements %}
+{% with labels=evaluation.period.month_labels %}
+<div class="um-section kpi-detail-card">
+    <div class="um-section-header" style="justify-content:space-between;">
+        <div>
+            <i class="fas fa-bullseye"></i>
+            <h6 style="display:inline;">{{ m.kpi.name }}</h6>
+            <div style="font-size:.78rem; color:#64748b; margin-top:.2rem; font-family:Menlo,Consolas,monospace;">
+                <i class="fas fa-calculator mr-1"></i>{{ m.formula_snapshot }}
+            </div>
+        </div>
+        <span class="badge badge-info">% Ideal: {{ m.ideal_percent_snapshot }}%</span>
+    </div>
+
+    <div class="table-responsive">
+    <table class="frh10-table">
+        <thead>
+            <tr>
+                <th class="kpi-cell">Variable</th>
+                <th class="month">{{ labels.0 }}</th>
+                <th class="month">{{ labels.1 }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vv in m.variable_values.all %}
+            <tr>
+                <td class="kpi-cell">
+                    <div class="kpi-name">{{ vv.variable.label }}</div>
+                    <div class="kpi-formula"><code>{{ vv.variable.name }}</code></div>
+                </td>
+                <td>{{ vv.value_month1|floatformat:2 }}</td>
+                <td>{{ vv.value_month2|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td style="text-align:right; font-weight:600;">% calculado</td>
+                <td class="calc-cell">{{ m.percent_month1|default:"—" }}{% if m.percent_month1 %}%{% endif %}</td>
+                <td class="calc-cell">{{ m.percent_month2|default:"—" }}{% if m.percent_month2 %}%{% endif %}</td>
+            </tr>
+            <tr class="bimester-cell">
+                <td colspan="2" style="text-align:right;">% Bimestre</td>
+                <td>{{ m.percent_bimester|default:"—" }}{% if m.percent_bimester %}%{% endif %}</td>
+            </tr>
+        </tfoot>
+    </table>
+    </div>
+</div>
+{% endwith %}
+{% empty %}
+    <div class="alert alert-light">Sin mediciones registradas.</div>
+{% endfor %}
+
+{% if evaluation.notes %}
+<div class="eval-header-card" style="margin-top:1rem;">
+    <label>Notas</label>
+    <div style="white-space:pre-line;">{{ evaluation.notes }}</div>
+</div>
+{% endif %}
+
+{% endblock %}

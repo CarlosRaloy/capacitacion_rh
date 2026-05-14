@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_content %}
+    <title>Periodos</title>
+    <link rel="stylesheet" href="{% static 'css/mesures/desempeno.css' %}">
+    <link rel="stylesheet" href="{% static 'css/users/pane_user.css' %}">
+{% endblock %}
+
+{% block panel_page %}
+    Desempeño <small>Periodos bimestrales</small>
+{% endblock %}
+
+{% block panel_title %}
+    Periodos
+{% endblock %}
+
+{% block content %}
+
+<div class="frh10-banner">
+    <div>
+        <h2>Periodos de evaluación</h2>
+        <div style="font-size:.85rem; opacity:.85; margin-top:.25rem;">
+            6 bimestres por año. Bloquea un periodo cuando ya nadie deba modificarlo.
+        </div>
+    </div>
+    <span class="frh10-code">Catálogo</span>
+</div>
+
+<button id="btn-create-period" class="btn btn-eval-new mb-3">
+    <i class="fas fa-plus"></i> Nuevo periodo
+</button>
+
+<div class="rwd-container">
+  <table class="table table-bordered table-hover table-sm align-middle">
+      <thead class="table-light">
+          <tr>
+              <th>Año</th>
+              <th>Bimestre</th>
+              <th>Estado</th>
+              <th>Notas</th>
+              <th>Evaluaciones</th>
+              <th class="text-center">Acciones</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for p in periods %}
+          <tr>
+              <td><b>{{ p.year }}</b></td>
+              <td>{{ p.get_bimester_display }}</td>
+              <td>
+                  {% if p.locked %}
+                      <span class="period-locked-badge"><i class="fas fa-lock mr-1"></i>Bloqueado</span>
+                  {% else %}
+                      <span class="badge badge-success">Abierto</span>
+                  {% endif %}
+              </td>
+              <td>{{ p.notes|default:"—"|truncatechars:60 }}</td>
+              <td>{{ p.evaluations.count }}</td>
+              <td class="text-center">
+                  <button class="btn btn-sm btn-primary btn-edit-period"
+                          data-id="{{ p.id }}"
+                          data-year="{{ p.year }}"
+                          data-bimester="{{ p.bimester }}"
+                          data-locked="{{ p.locked|yesno:'1,0' }}"
+                          data-notes="{{ p.notes|default_if_none:'' }}">
+                      <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-delete-period" data-id="{{ p.id }}">
+                      <i class="fas fa-trash-alt"></i>
+                  </button>
+              </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted">Sin periodos registrados.</td></tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+<div class="modal fade user-modal" id="modal-period" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <form id="form-period" method="POST" autocomplete="off">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create">
+      <input type="hidden" name="obj_id">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-calendar-alt"></i> <span id="period-modal-title">Nuevo periodo</span></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <section class="um-section">
+            <div class="row">
+              <div class="col-md-4 um-field mb-2">
+                <label>Año <span class="text-danger">*</span></label>
+                <input type="number" name="year" class="form-control" required min="2000" max="2100" value="2026">
+              </div>
+              <div class="col-md-8 um-field mb-2">
+                <label>Bimestre <span class="text-danger">*</span></label>
+                <select name="bimester" class="form-control" required>
+                    <option value="1">1 — Ene-Feb</option>
+                    <option value="2">2 — Mar-Abr</option>
+                    <option value="3">3 — May-Jun</option>
+                    <option value="4">4 — Jul-Ago</option>
+                    <option value="5">5 — Sep-Oct</option>
+                    <option value="6">6 — Nov-Dic</option>
+                </select>
+              </div>
+              <div class="col-md-12 um-field mb-2">
+                <label>Notas</label>
+                <textarea name="notes" class="form-control" rows="2"></textarea>
+              </div>
+              <div class="col-md-12 um-field mb-2 edit-only" style="display:none;">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" name="locked" id="locked-switch" value="1">
+                    <label class="custom-control-label" for="locked-switch">Bloqueado (no se aceptan cambios)</label>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function () {
+    const $modal = $('#modal-period');
+    const $form  = $('#form-period');
+
+    $('#btn-create-period').on('click', function () {
+        $form[0].reset();
+        $form.find('input[name="action"]').val('create');
+        $form.find('input[name="obj_id"]').val('');
+        $form.find('.edit-only').hide();
+        $('#period-modal-title').text('Nuevo periodo');
+        $modal.modal('show');
+    });
+
+    $('.btn-edit-period').on('click', function () {
+        const $b = $(this);
+        $form.find('input[name="action"]').val('edit');
+        $form.find('input[name="obj_id"]').val($b.data('id'));
+        $form.find('input[name="year"]').val($b.data('year'));
+        $form.find('select[name="bimester"]').val($b.data('bimester'));
+        $form.find('textarea[name="notes"]').val($b.data('notes'));
+        $form.find('input[name="locked"]').prop('checked', String($b.data('locked')) === '1');
+        $form.find('.edit-only').show();
+        $('#period-modal-title').text('Editar periodo');
+        $modal.modal('show');
+    });
+
+    $form.on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: "{% url 'mesures:panel_periods' %}",
+            method: 'POST',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            success: function (d) {
+                if (d.success) Swal.fire('✅', d.message, 'success').then(() => location.reload());
+                else Swal.fire('❌', d.message, 'error');
+            },
+            error: function () { Swal.fire('❌', 'Error inesperado.', 'error'); }
+        });
+    });
+
+    $('.btn-delete-period').on('click', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: '¿Eliminar periodo?', text: 'Solo se borra si no tiene evaluaciones.',
+            icon: 'warning', showCancelButton: true,
+            confirmButtonText: 'Sí', cancelButtonText: 'Cancelar'
+        }).then((r) => {
+            if (!r.isConfirmed) return;
+            $.ajax({
+                url: "{% url 'mesures:panel_periods' %}",
+                method: 'POST',
+                data: { action: 'delete', obj_id: id, csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function (d) {
+                    if (d.success) Swal.fire('✅', d.message, 'success').then(() => location.reload());
+                    else Swal.fire('❌', d.message, 'error');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

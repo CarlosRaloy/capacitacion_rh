@@ -20,6 +20,13 @@
         {% endif %}
     }
 
+    /* logic_manager: visible solo para niveles 2 (Admin), 3 (Admin sistema), 5 (RH) */
+    .logic_manager {
+        {% if request.user.profile.level != 2 and request.user.profile.level != 3 and request.user.profile.level != 5 %}
+            display: none !important;
+        {% endif %}
+    }
+
 /*<li class="has-sub logic_id">*/
 </style>
 
@@ -82,7 +89,10 @@
                     <span>Home</span>
                 </a>
                 <ul class="sub-menu">
-                    <li><a href="{% url 'users:panel_main' %}"><i class="fa-solid fa-table"></i> Listado</a></li>
+                    <li><a href="{% url 'users:panel_main' %}"><i class="fa-solid fa-star"></i> Principal</a></li>
+                    <li><a href="{% url 'mesures:desempeno_main' %}"><i class="fa-solid fa-chart-line" style="color:#10b981;"></i> Desempeño</a></li>
+                    <li class="logic_manager"><a href="{% url 'mesures:panel_kpis' %}"><i class="fa-solid fa-bullseye" style="color:#f59e0b;"></i> KPIs</a></li>
+                    <li class="logic_manager"><a href="{% url 'mesures:panel_periods' %}"><i class="fa-solid fa-calendar-alt" style="color:#a78bfa;"></i> Periodos</a></li>
                 </ul>
             </li>
             <!-- End Panel -->

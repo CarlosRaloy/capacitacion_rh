@@ -1,0 +1,306 @@
+/* =============================================================
+   Módulo Desempeño — estilos compartidos (Bootstrap 4 / Color Admin)
+   ============================================================= */
+
+/* ---------- Cabecera de página (estilo F-RH-10) ---------- */
+.frh10-banner {
+    background: linear-gradient(135deg, #1a3a6c 0%, #1e4f8c 100%);
+    color: #fff;
+    padding: 1.1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 24px rgba(15, 30, 60, .12);
+}
+.frh10-banner h2 {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.frh10-banner .frh10-code {
+    background: rgba(255,255,255,.15);
+    border-radius: 6px;
+    padding: .25rem .6rem;
+    font-size: .8rem;
+    letter-spacing: 1px;
+}
+
+/* ---------- Pills de filtro ---------- */
+.filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+.filter-pills .pill {
+    background: #eef2f8;
+    color: #475569;
+    padding: .35rem .9rem;
+    border-radius: 999px;
+    font-size: .85rem;
+    text-decoration: none;
+    transition: all .15s;
+}
+.filter-pills .pill:hover { background: #dbe3ee; color: #1e293b; }
+.filter-pills .pill.active {
+    background: linear-gradient(135deg, #0a6ebd 0%, #009587 100%);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(10, 110, 189, .25);
+}
+
+/* ---------- Tarjetas de evaluación ---------- */
+.eval-card {
+    background: #fff;
+    border: 1px solid #e9eef5;
+    border-radius: 12px;
+    padding: 1rem 1.15rem;
+    margin-bottom: .8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 6px rgba(15, 30, 60, .04);
+    transition: transform .12s, box-shadow .12s;
+}
+.eval-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(15, 30, 60, .08);
+}
+.eval-card .emp-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a6ebd 0%, #009587 100%);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.eval-card .emp-info { flex: 1 1 auto; min-width: 0; }
+.eval-card .emp-name {
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+.eval-card .emp-meta {
+    font-size: .82rem;
+    color: #64748b;
+    margin: .1rem 0 0;
+}
+.eval-card .eval-score {
+    text-align: right;
+    flex-shrink: 0;
+}
+.eval-card .eval-score .pct {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0a6ebd;
+    line-height: 1;
+}
+.eval-card .eval-score .lbl {
+    font-size: .72rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+.eval-card .actions { display: flex; gap: .25rem; flex-shrink: 0; }
+
+/* Color semáforo del % */
+.eval-card .eval-score.good .pct { color: #10b981; }
+.eval-card .eval-score.warn .pct { color: #f59e0b; }
+.eval-card .eval-score.bad  .pct { color: #ef4444; }
+
+/* ---------- Tabla F-RH-10 ---------- */
+.frh10-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15, 30, 60, .06);
+}
+.frh10-table th, .frh10-table td {
+    border: 1px solid #d8dfe9;
+    padding: .55rem .65rem;
+    vertical-align: middle;
+    text-align: center;
+    font-size: .85rem;
+}
+.frh10-table thead th {
+    background: #f1f5fb;
+    color: #334155;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: .72rem;
+    letter-spacing: .5px;
+    padding: .7rem .65rem;
+}
+.frh10-table thead th.month { background: #e7edf6; }
+.frh10-table thead th.bimester {
+    background: linear-gradient(135deg, #d4e3f5 0%, #c5dbf0 100%);
+    color: #1e3a5f;
+}
+.frh10-table .kpi-cell {
+    text-align: left;
+    background: #fbfcfe;
+    min-width: 230px;
+}
+.frh10-table .kpi-cell .kpi-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+.frh10-table .kpi-cell .kpi-formula {
+    font-size: .76rem;
+    color: #64748b;
+    font-style: italic;
+    margin-top: .2rem;
+}
+.frh10-table .kpi-cell .kpi-inputs {
+    background: #fff7d6;
+    border-radius: 6px;
+    padding: .35rem .5rem;
+    margin-top: .45rem;
+    display: flex;
+    gap: .35rem;
+    align-items: center;
+    font-size: .8rem;
+}
+.frh10-table .kpi-cell .kpi-inputs label {
+    margin: 0;
+    font-size: .7rem;
+    color: #92591b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    min-width: 60px;
+}
+.frh10-table .kpi-cell .kpi-inputs input {
+    flex: 1 1 0;
+    padding: .25rem .45rem;
+    border: 1px solid #e6c97a;
+    border-radius: 5px;
+    font-size: .85rem;
+    background: #fff;
+    text-align: right;
+}
+.frh10-table .kpi-cell .kpi-inputs input:focus {
+    outline: none;
+    border-color: #b89030;
+    box-shadow: 0 0 0 2px rgba(184, 144, 48, .2);
+}
+.frh10-table .ideal-cell { background: #eef2f8; font-weight: 600; color: #334155; }
+.frh10-table .bimester-cell { background: #e9f0fb; font-weight: 700; color: #0a6ebd; }
+.frh10-table .month-input {
+    width: 90px;
+    margin: 0 auto;
+    padding: .3rem .35rem;
+    border: 1px solid #d8dfe9;
+    border-radius: 6px;
+    text-align: right;
+    font-size: .85rem;
+}
+.frh10-table .month-input:focus {
+    outline: none;
+    border-color: #0a6ebd;
+    box-shadow: 0 0 0 2px rgba(10, 110, 189, .15);
+}
+.frh10-table .calc-cell {
+    background: #fafbfd;
+    color: #334155;
+    font-weight: 500;
+}
+.frh10-table tfoot td {
+    background: linear-gradient(135deg, #0a6ebd 0%, #009587 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: .8rem;
+}
+
+/* ---------- Form de evaluación: cabecera con datos del empleado ---------- */
+.eval-header-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid #e9eef5;
+    box-shadow: 0 2px 6px rgba(15, 30, 60, .04);
+}
+.eval-header-card .row > div { margin-bottom: .6rem; }
+.eval-header-card label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: .5px;
+    font-weight: 600;
+    margin-bottom: .25rem;
+    display: block;
+}
+.eval-header-card .form-control {
+    border-radius: 8px;
+    border: 1px solid #d8dfe9;
+    padding: .5rem .75rem;
+}
+.eval-header-card .form-control:focus {
+    border-color: #0a6ebd;
+    box-shadow: 0 0 0 3px rgba(10, 110, 189, .15);
+    outline: none;
+}
+
+/* ---------- Botón de guardar (sticky-friendly) ---------- */
+.eval-submit-bar {
+    background: #fff;
+    border-radius: 12px;
+    padding: .9rem 1.25rem;
+    margin-top: 1rem;
+    border: 1px solid #e9eef5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: 0 -2px 8px rgba(15, 30, 60, .06);
+}
+.eval-submit-bar .overall {
+    font-size: .9rem;
+    color: #334155;
+}
+.eval-submit-bar .overall b { color: #0a6ebd; font-size: 1.2rem; }
+.eval-submit-bar .btn-primary {
+    background: linear-gradient(135deg, #0a6ebd 0%, #009587 100%);
+    border: none;
+    padding: .55rem 1.4rem;
+    border-radius: 9px;
+    box-shadow: 0 6px 14px rgba(10, 110, 189, .25);
+}
+
+/* ---------- Botón principal "Nueva evaluación" ---------- */
+.btn-eval-new {
+    background: linear-gradient(135deg, #00a884 0%, #009587 100%);
+    border: none;
+    color: #fff;
+    padding: .55rem 1.1rem;
+    border-radius: 9px;
+    box-shadow: 0 6px 14px rgba(0, 149, 135, .25);
+    font-weight: 500;
+}
+.btn-eval-new:hover {
+    background: linear-gradient(135deg, #009587 0%, #007e72 100%);
+    color: #fff;
+}
+
+/* Cuando un periodo está bloqueado */
+.period-locked-badge {
+    background: #fde68a;
+    color: #92400e;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}

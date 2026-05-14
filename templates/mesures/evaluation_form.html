@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_content %}
+    <title>{% if evaluation %}Editar{% else %}Nueva{% endif %} evaluación</title>
+    <link rel="stylesheet" href="{% static 'css/mesures/desempeno.css' %}">
+{% endblock %}
+
+{% block panel_page %}
+    Desempeño <small>{% if evaluation %}Editar{% else %}Nueva{% endif %} evaluación</small>
+{% endblock %}
+
+{% block panel_title %}
+    Captura F-RH-10
+{% endblock %}
+
+{% block content %}
+
+<div class="frh10-banner">
+    <div>
+        <h2>{% if evaluation %}Editar evaluación{% else %}Nueva evaluación{% endif %}</h2>
+        <div style="font-size:.85rem; opacity:.85; margin-top:.25rem;">
+            Captura los valores de cada variable por mes — los porcentajes se calculan al instante.
+        </div>
+    </div>
+    <span class="frh10-code">F-RH-10 Rev. 01</span>
+</div>
+
+<form id="form-eval" method="POST">
+    {% csrf_token %}
+
+    <div class="eval-header-card">
+        <div class="row">
+            <div class="col-md-5">
+                <label>Trabajador <span class="text-danger">*</span></label>
+                <select name="employee" class="form-control" required {% if evaluation %}disabled{% endif %}>
+                    <option value="">— Selecciona —</option>
+                    {% for u in employees %}
+                        <option value="{{ u.id }}"
+                            {% if evaluation and evaluation.employee_id == u.id %}selected{% endif %}>
+                            {{ u.get_full_name|default:u.username }}
+                            {% if u.profile.position %}— {{ u.profile.position.name_position }}{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if evaluation %}
+                    <input type="hidden" name="employee" value="{{ evaluation.employee_id }}">
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <label>Bimestre <span class="text-danger">*</span></label>
+                <select name="period" class="form-control" required {% if evaluation %}disabled{% endif %}>
+                    <option value="">— Selecciona —</option>
+                    {% for p in periods %}
+                        <option value="{{ p.id }}"
+                            {% if evaluation and evaluation.period_id == p.id %}selected{% endif %}>
+                            {{ p }}{% if p.locked %} 🔒{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if evaluation %}
+                    <input type="hidden" name="period" value="{{ evaluation.period_id }}">
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                <label>Evaluador</label>
+                <input type="text" class="form-control" value="{{ request.user.get_full_name|default:request.user.username }}" disabled>
+                <input type="hidden" name="evaluator" value="{{ request.user.id }}">
+            </div>
+            <div class="col-md-12 mt-2">
+                <label>Notas</label>
+                <textarea name="notes" class="form-control" rows="2" placeholder="Observaciones (opcional)">{% if evaluation %}{{ evaluation.notes|default:'' }}{% endif %}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI cards (uno por KPI activo) -->
+    {% for kpi in kpis %}
+        <div class="um-section kpi-card" data-kpi="{{ kpi.id }}"
+             data-formula="{{ kpi.formula }}"
+             data-ideal="{{ kpi.ideal_percent }}">
+            <div class="um-section-header" style="justify-content:space-between; align-items:flex-start;">
+                <div>
+                    <i class="fas fa-bullseye"></i>
+                    <h6 style="display:inline;">{{ kpi.name }}</h6>
+                    <div style="font-size:.78rem; color:#64748b; margin-top:.2rem; font-family:Menlo, Consolas, monospace;">
+                        <i class="fas fa-calculator mr-1"></i>{{ kpi.formula }}
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <span class="badge badge-info">% Ideal: {{ kpi.ideal_percent }}%</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+            <table class="frh10-table" style="margin-top:.5rem;">
+                <thead>
+                    <tr>
+                        <th class="kpi-cell" style="min-width:240px;">Variable</th>
+                        <th class="month"><span class="lbl-m1">Mes 1</span></th>
+                        <th class="month"><span class="lbl-m2">Mes 2</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in kpi.variables.all %}
+                    <tr>
+                        <td class="kpi-cell">
+                            <div class="kpi-name">{{ v.label }}</div>
+                            <div class="kpi-formula">var: <code>{{ v.name }}</code></div>
+                        </td>
+                        <td>
+                            <input type="number" step="0.0001"
+                                   name="var_{{ kpi.id }}_{{ v.id }}_m1"
+                                   data-var="{{ v.name }}" data-month="1"
+                                   class="month-input var-input">
+                        </td>
+                        <td>
+                            <input type="number" step="0.0001"
+                                   name="var_{{ kpi.id }}_{{ v.id }}_m2"
+                                   data-var="{{ v.name }}" data-month="2"
+                                   class="month-input var-input">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="background:#f8fafc;">
+                        <td style="text-align:right; font-weight:600;">% calculado</td>
+                        <td class="calc-cell"><span class="pct-m1">—</span></td>
+                        <td class="calc-cell"><span class="pct-m2">—</span></td>
+                    </tr>
+                    <tr class="bimester-cell">
+                        <td colspan="2" style="text-align:right;">% Bimestre</td>
+                        <td><span class="pct-bim">—</span></td>
+                    </tr>
+                </tfoot>
+            </table>
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-warning">
+            No hay KPIs activos. <a href="{% url 'mesures:panel_kpis' %}">Crea uno primero</a>.
+        </div>
+    {% endfor %}
+
+    <div class="eval-submit-bar">
+        <div class="overall">
+            Promedio actual: <b id="overall-pct-bar">0.00%</b>
+        </div>
+        <div>
+            <a href="{% url 'mesures:desempeno_main' %}" class="btn btn-light">Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save mr-1"></i> {% if evaluation %}Actualizar{% else %}Guardar{% endif %}
+            </button>
+        </div>
+    </div>
+</form>
+
+<script id="preload-data" type="application/json">
+{
+  "month_labels": { {% for p in periods %}"{{ p.id }}": ["{{ p.month_labels.0 }}", "{{ p.month_labels.1 }}"]{% if not forloop.last %},{% endif %}{% endfor %} },
+  "preload": {
+    {% if evaluation %}
+        {% for kpi_id, vmap in measurements_map.items %}
+          "{{ kpi_id }}": {
+            {% for var_id, vals in vmap.items %}
+              "{{ var_id }}": {"m1": "{{ vals.m1 }}", "m2": "{{ vals.m2 }}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    {% endif %}
+  },
+  "current_period": {% if evaluation %}{{ evaluation.period_id }}{% else %}null{% endif %}
+}
+</script>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function () {
+    const DATA = JSON.parse(document.getElementById('preload-data').textContent);
+
+    // ----- safe-eval cliente (replica del backend) -----
+    function evalFormula(formula, ctx) {
+        // Sustituye nombres por sus valores; valida que solo haya tokens permitidos.
+        const allowedNames = Object.keys(ctx);
+        // Tokenización liberal: nombres, números, operadores, paréntesis.
+        const tokens = formula.match(/[A-Za-z_][A-Za-z0-9_]*|[0-9]+(\.[0-9]+)?|[+\-*/%()]|\*\*/g) || [];
+        let expr = '';
+        for (const t of tokens) {
+            if (/^[A-Za-z_]/.test(t)) {
+                if (!allowedNames.includes(t)) return NaN;
+                expr += `(${Number(ctx[t]) || 0})`;
+            } else {
+                expr += t;
+            }
+        }
+        try {
+            // eslint-disable-next-line no-new-func
+            const v = Function('"use strict"; return (' + expr + ')')();
+            return (typeof v === 'number' && isFinite(v)) ? v : NaN;
+        } catch { return NaN; }
+    }
+
+    function fmt(n) {
+        if (!isFinite(n) || isNaN(n)) return '—';
+        return n.toFixed(2) + '%';
+    }
+
+    function readCtxFor($card, month) {
+        const ctx = { ideal: parseFloat($card.data('ideal')) || 0 };
+        $card.find('.var-input[data-month="' + month + '"]').each(function () {
+            const $i = $(this);
+            ctx[$i.data('var')] = parseFloat($i.val() || 0);
+        });
+        return ctx;
+    }
+
+    function recalcCard($card) {
+        const formula = $card.data('formula') || '';
+        const p1 = evalFormula(formula, readCtxFor($card, 1));
+        const p2 = evalFormula(formula, readCtxFor($card, 2));
+        $card.find('.pct-m1').text(fmt(p1));
+        $card.find('.pct-m2').text(fmt(p2));
+
+        let pbim;
+        if (!isFinite(p1) && !isFinite(p2)) pbim = NaN;
+        else if (!isFinite(p1)) pbim = p2;
+        else if (!isFinite(p2)) pbim = p1;
+        else pbim = (p1 + p2) / 2;
+        $card.find('.pct-bim').text(fmt(pbim));
+        return isFinite(pbim) ? pbim : null;
+    }
+
+    function recalcAll() {
+        let acc = 0, n = 0;
+        $('.kpi-card').each(function () {
+            const v = recalcCard($(this));
+            if (v !== null) { acc += v; n++; }
+        });
+        const overall = n ? (acc / n) : 0;
+        $('#overall-pct-bar').text(overall.toFixed(2) + '%');
+    }
+
+    function applyMonthLabels(periodId) {
+        const labels = DATA.month_labels[periodId];
+        if (!labels) return;
+        $('.lbl-m1').text(labels[0]);
+        $('.lbl-m2').text(labels[1]);
+        $('.var-input[data-month="1"]').attr('placeholder', labels[0]);
+        $('.var-input[data-month="2"]').attr('placeholder', labels[1]);
+    }
+
+    // ----- Precarga -----
+    Object.entries(DATA.preload || {}).forEach(([kpiId, vmap]) => {
+        Object.entries(vmap).forEach(([varId, vals]) => {
+            $(`input[name="var_${kpiId}_${varId}_m1"]`).val(vals.m1);
+            $(`input[name="var_${kpiId}_${varId}_m2"]`).val(vals.m2);
+        });
+    });
+    if (DATA.current_period) applyMonthLabels(DATA.current_period);
+    recalcAll();
+
+    // ----- Eventos -----
+    $(document).on('input', '.var-input', function () {
+        recalcCard($(this).closest('.kpi-card'));
+        recalcAll();
+    });
+    $('select[name="period"]').on('change', function () {
+        applyMonthLabels($(this).val());
+    });
+
+    $('#form-eval').on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: window.location.pathname,
+            method: 'POST',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            success: function (d) {
+                if (d.success) {
+                    Swal.fire('✅ Guardado', d.message, 'success').then(() => {
+                        window.location.href = d.redirect || "{% url 'mesures:desempeno_main' %}";
+                    });
+                } else Swal.fire('❌ Error', d.message, 'error');
+            },
+            error: function () { Swal.fire('❌ Error', 'Error inesperado en el servidor.', 'error'); }
+        });
+    });
+});
+</script>
+{% endblock %}
